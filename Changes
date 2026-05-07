@@ -1,0 +1,80 @@
+// GameLogic.java
+public class GameLogic {
+
+    public enum Direction {
+        UP, DOWN, LEFT, RIGHT
+    }
+
+    private int playerX = 0;
+    private int playerY = 0;
+
+    public void handleInput(Direction direction) {
+        switch (direction) {
+            case UP    -> playerY--;
+            case DOWN  -> playerY++;
+            case LEFT  -> playerX--;
+            case RIGHT -> playerX++;
+        }
+        System.out.printf("LOGIC: Spieler auf Position (%d, %d)%n", playerX, playerY);
+    }
+
+    public int getPlayerX() { return playerX; }
+    public int getPlayerY() { return playerY; }
+}
+
+/——————————————————————/
+
+/——————————————————————/
+
+// Renderer.java
+public class Renderer {
+
+    private final GameLogic gameLogic;
+
+    public Renderer(GameLogic logic) {
+        this.gameLogic = logic;
+    }
+
+    // Stellt den aktuellen Zustand „statisch“ dar (z.B. für Konsole oder später UI)
+    public void render() {
+        int x = gameLogic.getPlayerX();
+        int y = gameLogic.getPlayerY();
+        System.out.printf("RENDER: Aktuelle Position: (%d, %d)%n", x, y);
+        // Hier kannst du später z.B. ein 2D‑Array / Grid „zeichnen“ oder an UI übergeben
+    }
+}
+
+/——————————————————————/
+
+/——————————————————————/
+
+// GameController.java
+import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
+public class GameController {
+
+    private final GameLogic gameLogic = new GameLogic();
+    private final Renderer renderer = new Renderer(gameLogic);
+
+    public void attachKeyHandler(Scene scene) {
+        scene.setOnKeyPressed(this::handleKey);
+    }
+
+    private void handleKey(KeyEvent event) {
+        GameLogic.Direction dir = null;
+
+        switch (event.getCode()) {
+            case W -> dir = GameLogic.Direction.UP;
+            case S -> dir = GameLogic.Direction.DOWN;
+            case A -> dir = GameLogic.Direction.LEFT;
+            case D -> dir = GameLogic.Direction.RIGHT;
+        }
+
+        if (dir != null) {
+            gameLogic.handleInput(dir);
+            renderer.render();   // immer nach Eingabe „rendern“
+            event.consume();
+        }
+    }}
