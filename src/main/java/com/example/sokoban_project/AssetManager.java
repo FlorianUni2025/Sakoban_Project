@@ -3,15 +3,17 @@ package com.example.sokoban_project;
 import javafx.scene.image.Image;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class AssetManager {
     private final Map< String, Image> sprites = new HashMap<>();
 
     public AssetManager() {
 
-        Image wall = new Image(getClass().getResource("/Images/player.png").toExternalForm());
-        Image player = new Image(getClass().getResource("/Images/player_rigth.png").toExternalForm());
-        Image wall = new Image(getClass().getResource("/Images/player_rigth.png").toExternalForm());
+        Image wall = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/wall.png")));
+        Image player = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_right.png")));
+        Image ground = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/ground.png")));
+
 
         sprites.put(
                 "Wall",

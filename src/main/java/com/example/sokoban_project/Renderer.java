@@ -6,6 +6,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 public class Renderer {
     private final Stage iStage;
@@ -42,6 +45,40 @@ public class Renderer {
 
         updateGrid();
     }
+
+    private void setupMenu() {
+        Button startButton = new Button("Spiel starten");
+        Button leftButton  = new Button("<");
+        Button rightButton = new Button(">");
+        Label  levelLabel  = new Label("Level: " + state.getLevel());
+
+        // Level-Auswahl
+        HBox levelBox = new HBox(10, leftButton, levelLabel, rightButton);
+        levelBox.setAlignment(Pos.CENTER);
+
+        leftButton.setOnAction(e -> {
+            int newLevel = state.getLevel() - 1;
+            if (newLevel >= 1) {
+                state.setLevel(newLevel);
+                levelLabel.setText("Level: " + state.getLevel());
+            }
+        });
+        rightButton.setOnAction(e -> {
+            int newLevel = gameLogic.getLevel() + 1;
+            gameLogic.setLevel(newLevel);
+            levelLabel.setText("Level: " + gameLogic.getLevel());
+        });
+
+        // Menü-Root
+        VBox menuRoot = new VBox(20, startButton, levelBox);
+        menuRoot.setAlignment(Pos.CENTER);
+        menuRoot.setPadding(new Insets(20));
+
+        menuScene = new Scene(menuRoot, 400, 300);
+
+        // Start-Button wechselt zur Game-Scene
+        startButton.setOnAction(e -> gameLogic.startGame());
+    }
     public void updateGrid() {
 
         grid.getChildren().clear();
@@ -52,7 +89,7 @@ public class Renderer {
 
             for (int col = 0; col < columns; col++) {
 
-                Entity entity = entities[row][col];
+
 
                 if (entity == null) {
                     continue;

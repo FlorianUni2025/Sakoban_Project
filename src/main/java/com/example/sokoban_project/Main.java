@@ -3,6 +3,8 @@ package com.example.sokoban_project;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import java.util.Objects;
+
 public class Main extends Application {
     public static void main(String[] args) {
         launch(args);

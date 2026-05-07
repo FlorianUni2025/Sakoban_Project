@@ -7,6 +7,7 @@ public class GameState {
     private Entity field [][];
     private int col;
     private int row;
+    private int level;
 
     GameState(int col, int row){
         this.col = col;
@@ -30,4 +31,12 @@ public class GameState {
     public Entity[][] getEntities(){
         return field;
     };
+
+    public int getLevel(){
+        return level;
+    }
+
+    public int setLevel(int level){
+        this.level = level;
+    }
 }
