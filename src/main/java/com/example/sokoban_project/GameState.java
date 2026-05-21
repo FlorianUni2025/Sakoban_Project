@@ -7,7 +7,9 @@ public class GameState {
     private Entity field [][];
     private int col;
     private int row;
-    private int level;
+    private int levelId;
+    private int playerX;
+    private int playerY;
 
     GameState(int col, int row){
         this.col = col;
@@ -20,9 +22,33 @@ public class GameState {
         );
     }
 
-    public void startGame(int level){
-
+    /**
+     * Sets the current level based on a Level object
+     */
+    public void setLevel(Level level) {
+        this.levelId = level.getId();
+        this.col = level.getWidth();
+        this.row = level.getHeight();
+        this.playerX = level.getPlayerX();
+        this.playerY = level.getPlayerY();
+        this.field = level.getGameField();
     }
+
+    /**
+     * Gets the current level ID (key for the renderer)
+     */
+    public int getLevelId() {
+        return levelId;
+    }
+
+    public int getPlayerX() {
+        return playerX;
+    }
+
+    public int getPlayerY() {
+        return playerY;
+    }
+
     public void updateField(BiPredicate<Integer, Integer> con, BiConsumer<Integer, Integer> action){
         for(int i=0; i<col; i++){
             for(int j=0; j<row; j++){
@@ -32,6 +58,7 @@ public class GameState {
             }
         }
     }
+
     public String[][] getLayout(){
         String[][] keys = new String[col][row];
 
@@ -41,13 +68,13 @@ public class GameState {
             }
         }
         return keys;
-    };
-
-    public int getLevel(){
-        return level;
     }
 
-    public void setLevel(int level){
-        this.level = level;
+    public int getCol() {
+        return col;
+    }
+
+    public int getRow() {
+        return row;
     }
 }
