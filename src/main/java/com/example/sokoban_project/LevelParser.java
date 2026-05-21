@@ -18,6 +18,7 @@ public class LevelParser {
      * [FIELD DATA - each line contains 'w' for wall or 'g' for ground]
      * ---
      */
+    static int sum = 0;
     public static List<Level> parseLevels(String filename) throws IOException {
         List<Level> levels = new ArrayList<>();
         
@@ -35,6 +36,7 @@ public class LevelParser {
             if (line.equals("+++")) {
                 Level level = parseLevel(reader);
                 if (level != null) {
+                    level.setId(sum);
                     levels.add(level);
                 }
             }
@@ -90,7 +92,7 @@ public class LevelParser {
                 }
             }
         }
-        
-        return new Level(width, height, playerX, playerY, gameField);
+        sum = sum +1;
+        return new Level(sum, width, height, playerX, playerY, gameField);
     }
 }

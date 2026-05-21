@@ -51,24 +51,24 @@ public class Renderer {
         Button startButton = new Button("Spiel starten");
         Button leftButton = new Button("<");
         Button rightButton = new Button(">");
-        Label levelLabel = new Label("Level: " + state.getLevel());
+        Label levelLabel = new Label("Level: " + state.getLevelId());
 
         // Level-Auswahl
         HBox levelBox = new HBox(10, leftButton, levelLabel, rightButton);
         levelBox.setAlignment(Pos.CENTER);
 
         leftButton.setOnAction(e -> {
-            int newLevel = state.getLevel() - 1;
+            int newLevel = state.getLevelId() - 1;
             if (newLevel >= 1) {
                 state.setLevel(newLevel);
-                levelLabel.setText("Level: " + state.getLevel());
+                levelLabel.setText("Level: " + state.getLevelId());
             }
         });
 
         rightButton.setOnAction(e -> {
-            int newLevel = state.getLevel() + 1;
+            int newLevel = state.getLevelId() + 1;
             state.setLevel(newLevel);
-            levelLabel.setText("Level: " + state.getLevel());
+            levelLabel.setText("Level: " + state.getLevelId());
         });
 
         // Menü-Root
