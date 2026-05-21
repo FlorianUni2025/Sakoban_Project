@@ -101,7 +101,7 @@ public class Renderer {
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < columns; col++) {
-                if (layout[row][col] == null) {
+                if (layout[col][row] == null) {
                     continue;
                 }
 
