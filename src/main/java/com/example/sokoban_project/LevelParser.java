@@ -18,9 +18,9 @@ public class LevelParser {
      * [FIELD DATA - each line contains 'w' for wall or 'g' for ground]
      * ---
      */
-    static int sum = 0;
     public static List<Level> parseLevels(String filename) throws IOException {
         List<Level> levels = new ArrayList<>();
+        int levelId = 0;
         
         InputStream inputStream = LevelParser.class.getResourceAsStream("/" + filename);
         if (inputStream == null) {
@@ -34,10 +34,10 @@ public class LevelParser {
             line = line.trim();
             
             if (line.equals("+++")) {
-                Level level = parseLevel(reader);
+                Level level = parseLevel(reader, levelId);
                 if (level != null) {
-                    level.setId(sum);
                     levels.add(level);
+                    levelId++;
                 }
             }
         }
@@ -50,7 +50,7 @@ public class LevelParser {
      * Parses a single level from the reader.
      * Expects the format after the +++ marker.
      */
-    private static Level parseLevel(BufferedReader reader) throws IOException {
+    private static Level parseLevel(BufferedReader reader, int levelId) throws IOException {
         String line;
         
         // Read dimensions
@@ -92,7 +92,7 @@ public class LevelParser {
                 }
             }
         }
-        sum = sum +1;
-        return new Level(sum, width, height, playerX, playerY, gameField);
+        
+        return new Level(levelId, width, height, playerX, playerY, gameField);
     }
 }
