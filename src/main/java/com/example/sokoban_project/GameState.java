@@ -19,6 +19,10 @@ public class GameState {
                 (Integer i, Integer j)-> field [i][j] = new Wall()
         );
     }
+
+    public void startGame(int level){
+
+    }
     public void updateField(BiPredicate<Integer, Integer> con, BiConsumer<Integer, Integer> action){
         for(int i=0; i<col; i++){
             for(int j=0; j<row; j++){
@@ -28,15 +32,22 @@ public class GameState {
             }
         }
     }
-    public Entity[][] getEntities(){
-        return field;
+    public String[][] getLayout(){
+        String[][] keys = new String[col][row];
+
+        for(int i=0; i<col; i++){
+            for(int j=0; j<row; j++){
+                keys[i][j] = field [i][j].getAsset();
+            }
+        }
+        return keys;
     };
 
     public int getLevel(){
         return level;
     }
 
-    public int setLevel(int level){
+    public void setLevel(int level){
         this.level = level;
     }
 }
