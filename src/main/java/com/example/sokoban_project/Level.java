@@ -1,0 +1,47 @@
+package com.example.sokoban_project;
+
+public class Level {
+    private Entity[][] gameField;
+    private int playerX;
+    private int playerY;
+    private int width;
+    private int height;
+
+    public Level(int width, int height, int playerX, int playerY, Entity[][] gameField) {
+        this.width = width;
+        this.height = height;
+        this.playerX = playerX;
+        this.playerY = playerY;
+        this.gameField = gameField;
+    }
+
+    public Entity[][] getGameField() {
+        return gameField;
+    }
+
+    public int getPlayerX() {
+        return playerX;
+    }
+
+    public int getPlayerY() {
+        return playerY;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    @Override
+    public String toString() {
+        return "Level{" +
+                "width=" + width +
+                ", height=" + height +
+                ", playerX=" + playerX +
+                ", playerY=" + playerY +
+                '}';
+    }
+}
