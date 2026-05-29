@@ -44,6 +44,9 @@ public class GameState {
         this.playerX = level.getPlayerX();
         this.playerY = level.getPlayerY();
         this.field = level.getGameField();
+
+        Entity e = field[0][0];
+        System.out.println("State"+e.getAsset());
     }
 
     /**
@@ -73,10 +76,16 @@ public class GameState {
 
     public String[][] getLayout(){
         String[][] keys = new String[col][row];
+        setLevel(levelId);
 
         for(int i=0; i<col; i++){
             for(int j=0; j<row; j++){
-                keys[i][j] = field [i][j].getAsset();
+                Entity e = field [i][j];
+                if(e != null){keys[i][j] = e.getAsset();}
+                else{
+                    keys[i][j] = "Ground";
+                    System.out.println("Not defined element");
+                }
             }
         }
         return keys;

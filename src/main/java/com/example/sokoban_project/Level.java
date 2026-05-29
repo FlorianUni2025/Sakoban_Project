@@ -15,6 +15,9 @@ public class Level {
         this.playerX = playerX;
         this.playerY = playerY;
         this.gameField = gameField;
+
+        Entity e = gameField[0][0];
+        System.out.println("Level"+e.getAsset());
     }
 
     public int getId() {

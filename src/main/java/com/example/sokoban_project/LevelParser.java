@@ -22,7 +22,7 @@ public class LevelParser {
         List<Level> levels = new ArrayList<>();
         int levelId = 0;
         
-        InputStream inputStream = LevelParser.class.getResourceAsStream("/" + filename);
+        InputStream inputStream = LevelParser.class.getResourceAsStream(filename);
         if (inputStream == null) {
             throw new IOException("File not found: " + filename);
         }
@@ -65,7 +65,7 @@ public class LevelParser {
         line = reader.readLine();
         if (line == null) return null;
         line = line.trim();
-        String[] playerPos = line.split("x");
+        String[] playerPos = line.split(",");
         int playerX = Integer.parseInt(playerPos[0]);
         int playerY = Integer.parseInt(playerPos[1]);
         
@@ -91,8 +91,10 @@ public class LevelParser {
                     gameField[x][y] = new Ground();
                 }
             }
+            System.out.println("in");
         }
-        
+        Entity e = gameField[0][0];
+        System.out.println("Parser"+e.getAsset());
         return new Level(levelId, width, height, playerX, playerY, gameField);
     }
 }

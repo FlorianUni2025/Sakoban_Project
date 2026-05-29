@@ -105,7 +105,7 @@ public class Renderer {
                     continue;
                 }
 
-                Image image = assets.get(layout[row][col]);
+                Image image = assets.get(layout[col][row]);
                 ImageView imageView = new ImageView(image);
                 imageView.setPreserveRatio(true);
 

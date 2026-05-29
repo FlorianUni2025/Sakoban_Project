@@ -3,19 +3,29 @@ package com.example.sokoban_project;
 abstract class Entity {
     private String asset;
 
+    Entity(String a){
+        this.asset = a;
+    }
+
     public String getAsset(){
         return asset;
     };
 }
 
 class Wall extends Entity{
-    private String asset = "Wall";
+    Wall(){
+        super("Wall");
+    }
 }
 
 class Player extends Entity{
-    private String asset = "Player";
+    Player(){
+        super("Player");
+    }
 }
 
 class Ground extends Entity{
-    private String asset = "Ground";
+    Ground(){
+        super("Ground");
+    }
 }
