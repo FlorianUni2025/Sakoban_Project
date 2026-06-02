@@ -37,21 +37,22 @@ public class GameLogic {
         // Calculate new position based on direction
         switch (direction) {
             case UP:
-                newY -= 1;
-                break;
-            case DOWN:
-                newY += 1;
-                break;
-            case LEFT:
                 newX -= 1;
                 break;
-            case RIGHT:
+            case DOWN:
                 newX += 1;
                 break;
+            case LEFT:
+                newY -= 1;
+                break;
+            case RIGHT:
+                newY += 1;
+                break;
         }
-
+        System.out.println(newY+ "" + newX);
         // Check if move is valid (not out of bounds, not a wall, etc.)
         if (isValidMove(newX, newY)) {
+            System.out.println("valid");
             state.setPlayerPosition(newX, newY);
             return true;
         }
@@ -64,14 +65,16 @@ public class GameLogic {
      */
     private boolean isValidMove(int x, int y) {
         // Check bounds
-        if (x < 0 || x >= state.getCol() || y < 0 || y >= state.getRow()) {
+        /*if (x < 0 || x >= state.getCol() || y < 0 || y >= state.getRow()) {
             return false;
-        }
+        }*/
 
         // Check if position is walkable (not a wall)
         String[][] layout = state.getLayout();
-        String cellType = layout[x][y];
-        
+        String cellType = layout[y][x];
+
+        System.out.println(cellType);
+
         return cellType != null && !cellType.equals("Wall");
     }
 

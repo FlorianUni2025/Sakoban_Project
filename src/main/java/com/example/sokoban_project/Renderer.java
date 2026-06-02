@@ -104,7 +104,7 @@ public class Renderer {
             @Override
             public void handle(KeyEvent keyEvent) {
                 Controller.KeyDirection direction = null;
-                
+                System.out.println(keyEvent.getCode());
                 switch (keyEvent.getCode()) {
                     case UP:
                     case W:
@@ -158,7 +158,7 @@ public class Renderer {
                 addImage(layout[col][row], col, row);
             }
         }
-        addImage("Player", state.getPlayerX(), state.getPlayerY());
+        addImage("Player", state.getPlayerY(), state.getPlayerX());
     }
 
     private void addImage(String spt, int col, int row){
