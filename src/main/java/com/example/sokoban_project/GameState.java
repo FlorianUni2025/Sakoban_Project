@@ -12,8 +12,8 @@ public class GameState {
     private int col;
     private int row;
     private int levelId;
-    private int playerX;
-    private int playerY;
+    private int[] player;
+
 
     GameState(int col, int row)  {
         this.col = col;
@@ -41,8 +41,7 @@ public class GameState {
         this.levelId = level.getId();
         this.col = level.getWidth();
         this.row = level.getHeight();
-        this.playerX = level.getPlayerX();
-        this.playerY = level.getPlayerY();
+        this.player = level.getPlayer();
         this.field = level.getGameField();
 
         Entity e = field[0][0];
@@ -57,12 +56,14 @@ public class GameState {
     }
 
     public int getPlayerX() {
-        return playerX;
+        return player[0];
     }
 
     public int getPlayerY() {
-        return playerY;
+        return player[1];
     }
+
+
 
     public void updateField(BiPredicate<Integer, Integer> con, BiConsumer<Integer, Integer> action){
         for(int i=0; i<col; i++){
@@ -98,4 +99,5 @@ public class GameState {
     public int getRow() {
         return row;
     }
+
 }

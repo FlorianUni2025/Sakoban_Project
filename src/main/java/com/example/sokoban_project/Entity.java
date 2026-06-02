@@ -29,3 +29,15 @@ class Ground extends Entity{
         super("Ground");
     }
 }
+
+class Crates extends Entity{
+    Crates(){
+        super("Crates");
+    }
+}
+
+class Goal extends Entity{
+    Goal(){
+        super("Goal");
+    }
+}

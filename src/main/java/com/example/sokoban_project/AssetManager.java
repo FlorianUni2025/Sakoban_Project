@@ -13,7 +13,8 @@ public class AssetManager {
         Image wall = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/wall.png")));
         Image player = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_right.png")));
         Image ground = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/ground.png")));
-
+        Image crates = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate.png")));
+        Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
 
         sprites.put(
                 "Wall",
@@ -28,6 +29,14 @@ public class AssetManager {
         sprites.put(
                 "Ground",
                 ground
+        );
+        sprites.put(
+                "Crates",
+                crates
+        );
+        sprites.put(
+                "Goal",
+                goal
         );
     }
 

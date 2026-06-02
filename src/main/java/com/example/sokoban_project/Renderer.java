@@ -1,9 +1,11 @@
 package com.example.sokoban_project;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -11,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
 
 public class Renderer {
     private final Stage iStage;
@@ -78,10 +81,17 @@ public class Renderer {
 
         menuScene = new Scene(menuRoot, 400, 300);
 
+
         // Start-Button wechselt zur Game-Scene
         startButton.setOnAction(e -> {
             updateGrid();
             showGame();
+            gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+                @Override
+                public void handle(KeyEvent keyEvent) {
+                    System.out.println(keyEvent.getText());
+                }
+            });
         });
     }
 
@@ -96,7 +106,6 @@ public class Renderer {
 
     public void updateGrid() {
         grid.getChildren().clear();
-
         String[][] layout = state.getLayout();
 
         for (int row = 0; row < rows; row++) {
@@ -104,19 +113,23 @@ public class Renderer {
                 if (layout[col][row] == null) {
                     continue;
                 }
-
-                Image image = assets.get(layout[col][row]);
-                ImageView imageView = new ImageView(image);
-                imageView.setPreserveRatio(true);
-
-                imageView.fitWidthProperty()
-                        .bind(grid.widthProperty().divide(columns));
-                imageView.fitHeightProperty()
-                        .bind(grid.heightProperty().divide(rows));
-
-                grid.add(imageView, col, row);
+                addImage(layout[col][row], col, row);
             }
         }
+        addImage("Player", state.getPlayerY(), state.getPlayerX());
+    }
+
+    private void addImage(String spt, int col, int row){
+        Image image = assets.get(spt);
+        ImageView imageView = new ImageView(image);
+        imageView.setPreserveRatio(true);
+
+        imageView.fitWidthProperty()
+                .bind(grid.widthProperty().divide(columns));
+        imageView.fitHeightProperty()
+                .bind(grid.heightProperty().divide(rows));
+
+        grid.add(imageView, col, row);
     }
 
     public GridPane getRoot() {

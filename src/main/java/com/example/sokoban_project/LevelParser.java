@@ -52,6 +52,7 @@ public class LevelParser {
      */
     private static Level parseLevel(BufferedReader reader, int levelId) throws IOException {
         String line;
+        int[] player = new int[2];
         
         // Read dimensions
         line = reader.readLine();
@@ -66,8 +67,8 @@ public class LevelParser {
         if (line == null) return null;
         line = line.trim();
         String[] playerPos = line.split(",");
-        int playerX = Integer.parseInt(playerPos[0]);
-        int playerY = Integer.parseInt(playerPos[1]);
+        player[0] = Integer.parseInt(playerPos[0]);
+        player[1] = Integer.parseInt(playerPos[1]);
         
         // Read field
         Entity[][] gameField = new Entity[width][height];
@@ -85,16 +86,16 @@ public class LevelParser {
             // Parse field characters
             char[] fieldChars = line.toCharArray();
             for (int x = 0; x < width && x < fieldChars.length; x++) {
-                if (fieldChars[x] == 'w') {
-                    gameField[x][y] = new Wall();
-                } else if (fieldChars[x] == 'g') {
-                    gameField[x][y] = new Ground();
+                switch (fieldChars[x]){
+                    case 'w': gameField[x][y] = new Wall(); break;
+                    case 'g': gameField[x][y] = new Ground(); break;
+                    case 'c': gameField[x][y] = new Crates(); break;
+                    case '*': gameField[x][y] = new Goal(); break;
                 }
             }
-            System.out.println("in");
         }
         Entity e = gameField[0][0];
         System.out.println("Parser"+e.getAsset());
-        return new Level(levelId, width, height, playerX, playerY, gameField);
+        return new Level(levelId, width, height, player, gameField);
     }
 }
