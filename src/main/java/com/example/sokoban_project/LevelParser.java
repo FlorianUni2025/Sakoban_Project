@@ -67,8 +67,8 @@ public class LevelParser {
         if (line == null) return null;
         line = line.trim();
         String[] playerPos = line.split(",");
-        player[0] = Integer.parseInt(playerPos[0]);
-        player[1] = Integer.parseInt(playerPos[1]);
+        player[0] = Integer.parseInt(playerPos[1]);
+        player[1] = Integer.parseInt(playerPos[0]);
         
         // Read field
         Entity[][] gameField = new Entity[width][height];

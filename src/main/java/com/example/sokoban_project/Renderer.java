@@ -158,7 +158,7 @@ public class Renderer {
                 addImage(layout[col][row], col, row);
             }
         }
-        addImage("Player", state.getPlayerY(), state.getPlayerX());
+        addImage("Player", state.getPlayerX(), state.getPlayerY());
     }
 
     private void addImage(String spt, int col, int row){

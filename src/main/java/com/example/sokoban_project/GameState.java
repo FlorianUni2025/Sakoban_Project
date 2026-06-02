@@ -9,16 +9,16 @@ public class GameState {
     private Entity field [][];
 
     private List<Level> levels;
-    private int col;
-    private int row;
+    private int x;
+    private int y;
     private int levelId;
     private int[] player;
 
 
-    GameState(int col, int row)  {
-        this.col = col;
-        this.row = row;
-        field = new Entity[col][row];
+    GameState(int x, int y)  {
+        this.x = x;
+        this.y = y;
+        field = new Entity[x][y];
         LevelParser lvlFile = new LevelParser();
         try {
             levels = lvlFile.parseLevels("/Levels/level.txt");
@@ -39,8 +39,8 @@ public class GameState {
     public void setLevel(int key) {
         Level level = levels.get(key);
         this.levelId = level.getId();
-        this.col = level.getWidth();
-        this.row = level.getHeight();
+        this.x = level.getWidth();
+        this.y = level.getHeight();
         this.player = level.getPlayer();
         this.field = level.getGameField();
 
@@ -74,8 +74,8 @@ public class GameState {
 
 
     public void updateField(BiPredicate<Integer, Integer> con, BiConsumer<Integer, Integer> action){
-        for(int i=0; i<col; i++){
-            for(int j=0; j<row; j++){
+        for(int i=0; i<x; i++){
+            for(int j=0; j<y; j++){
                 if(con.test(i,j)){
                     action.accept(i, j);
                 }
@@ -84,11 +84,11 @@ public class GameState {
     }
 
     public String[][] getLayout(){
-        String[][] keys = new String[col][row];
+        String[][] keys = new String[x][y];
         setLevel(levelId);
 
-        for(int i=0; i<col; i++){
-            for(int j=0; j<row; j++){
+        for(int i=0; i<x; i++){
+            for(int j=0; j<y; j++){
                 Entity e = field [i][j];
                 if(e != null){keys[i][j] = e.getAsset();}
                 else{
@@ -100,12 +100,5 @@ public class GameState {
         return keys;
     }
 
-    public int getCol() {
-        return col;
-    }
-
-    public int getRow() {
-        return row;
-    }
 
 }

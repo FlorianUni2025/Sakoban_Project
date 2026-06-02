@@ -37,16 +37,16 @@ public class GameLogic {
         // Calculate new position based on direction
         switch (direction) {
             case UP:
-                newX -= 1;
-                break;
-            case DOWN:
-                newX += 1;
-                break;
-            case LEFT:
                 newY -= 1;
                 break;
-            case RIGHT:
+            case DOWN:
                 newY += 1;
+                break;
+            case LEFT:
+                newX -= 1;
+                break;
+            case RIGHT:
+                newX += 1;
                 break;
         }
         System.out.println(newY+ "" + newX);
@@ -71,7 +71,7 @@ public class GameLogic {
 
         // Check if position is walkable (not a wall)
         String[][] layout = state.getLayout();
-        String cellType = layout[y][x];
+        String cellType = layout[x][y];
 
         System.out.println(cellType);
 
