@@ -1,7 +1,7 @@
 package com.example.sokoban_project;
 
 abstract class Entity {
-    private String asset;
+    protected String asset;
 
     Entity(String a){
         this.asset = a;
@@ -10,6 +10,8 @@ abstract class Entity {
     public String getAsset(){
         return asset;
     };
+
+
 }
 
 class Wall extends Entity{
@@ -19,9 +21,45 @@ class Wall extends Entity{
 }
 
 class Player extends Entity{
-    Player(){
-        super("Player");
+    private int x;
+    private int y;
+
+    Player(int x, int y){
+        super("Down_Player");
+        this.x = x;
+        this.y = y;
     }
+    public void setX(int x) {
+        if(x < this.x)
+        {
+            this.asset = "Left_Player";
+        }
+        else{
+            this.asset = "Right_Player";
+        }
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        if(y < this.y)
+        {
+            this.asset = "Up_Player";
+        }
+        else{
+            this.asset = "Down_Player";
+        }
+        this.y = y;
+    }
+
+
+    public int getX(){
+        return x;
+    }
+
+    public int getY(){
+        return y;
+    }
+
 }
 
 class Ground extends Entity{

@@ -52,7 +52,6 @@ public class LevelParser {
      */
     private static Level parseLevel(BufferedReader reader, int levelId) throws IOException {
         String line;
-        int[] player = new int[2];
         
         // Read dimensions
         line = reader.readLine();
@@ -67,8 +66,7 @@ public class LevelParser {
         if (line == null) return null;
         line = line.trim();
         String[] playerPos = line.split(",");
-        player[0] = Integer.parseInt(playerPos[1]);
-        player[1] = Integer.parseInt(playerPos[0]);
+        Player player = new Player(Integer.parseInt(playerPos[1]), Integer.parseInt(playerPos[0]));
         
         // Read field
         Entity[][] gameField = new Entity[width][height];

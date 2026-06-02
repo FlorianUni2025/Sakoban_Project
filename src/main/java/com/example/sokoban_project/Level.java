@@ -3,11 +3,11 @@ package com.example.sokoban_project;
 public class Level {
     private int id;
     private Entity[][] gameField;
-    private int[] player;
+    private Player player;
     private int width;
     private int height;
 
-    public Level(int id, int width, int height, int[] player, Entity[][] gameField) {
+    public Level(int id, int width, int height, Player player, Entity[][] gameField) {
         this.id = id;
         this.width = width;
         this.height = height;
@@ -30,7 +30,7 @@ public class Level {
         return gameField;
     }
 
-    public int[] getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
@@ -49,8 +49,8 @@ public class Level {
                 "id=" + id +
                 ", width=" + width +
                 ", height=" + height +
-                ", playerX=" + player[0] +
-                ", playerY=" + player[1] +
+                ", playerX=" + player +
+                ", playerY=" + player +
                 '}';
     }
 }

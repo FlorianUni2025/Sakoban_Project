@@ -12,7 +12,8 @@ public class GameState {
     private int x;
     private int y;
     private int levelId;
-    private int[] player;
+    private Player player;
+
 
 
     GameState(int x, int y)  {
@@ -52,8 +53,8 @@ public class GameState {
      * Updates the player position
      */
     public void setPlayerPosition(int x, int y) {
-        this.player[0] = x;
-        this.player[1] = y;
+        this.player.setX(x);
+        this.player.setY(y);
     }
 
     /**
@@ -64,11 +65,11 @@ public class GameState {
     }
 
     public int getPlayerX() {
-        return player[0];
+        return player.getX();
     }
 
     public int getPlayerY() {
-        return player[1];
+        return player.getY();
     }
 
 

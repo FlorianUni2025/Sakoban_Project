@@ -11,7 +11,10 @@ public class AssetManager {
     public AssetManager() {
 
         Image wall = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/wall.png")));
-        Image player = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_right.png")));
+        Image down = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_down.png")));
+        Image up = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_up.png")));
+        Image left = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_left.png")));
+        Image right = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_right.png")));
         Image ground = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/ground.png")));
         Image crates = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate.png")));
         Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
@@ -22,8 +25,20 @@ public class AssetManager {
         );
 
         sprites.put(
-                "Player",
-                player
+                "Down_Player",
+                down
+        );
+        sprites.put(
+                "Up_Player",
+                up
+        );
+        sprites.put(
+                "Left_Player",
+                left
+        );
+        sprites.put(
+                "Right_Player",
+                right
         );
 
         sprites.put(
