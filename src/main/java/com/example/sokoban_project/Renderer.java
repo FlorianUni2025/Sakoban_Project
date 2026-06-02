@@ -22,6 +22,7 @@ public class Renderer {
     private Scene menuScene;
     private GameState state;
     private AssetManager assets;
+    private Controller controller;
     private int columns = 16;
     private int rows = 10;
     private double aspectRatio = 16.0 / 10.0;
@@ -50,6 +51,13 @@ public class Renderer {
         showMenu();
     }
 
+    /**
+     * Set the controller to handle input events
+     */
+    public void setController(Controller controller) {
+        this.controller = controller;
+    }
+
     private void setupMenu() {
         Button startButton = new Button("Spiel starten");
         Button leftButton = new Button("<");
@@ -62,15 +70,15 @@ public class Renderer {
 
         leftButton.setOnAction(e -> {
             int newLevel = state.getLevelId() - 1;
-            if (newLevel >= 1) {
-                state.setLevel(newLevel);
+            if (newLevel >= 0) {
+                controller.selectLevel(newLevel);
                 levelLabel.setText("Level: " + state.getLevelId());
             }
         });
 
         rightButton.setOnAction(e -> {
             int newLevel = state.getLevelId() + 1;
-            state.setLevel(newLevel);
+            controller.selectLevel(newLevel);
             levelLabel.setText("Level: " + state.getLevelId());
         });
 
@@ -81,18 +89,52 @@ public class Renderer {
 
         menuScene = new Scene(menuRoot, 400, 300);
 
-
         // Start-Button wechselt zur Game-Scene
         startButton.setOnAction(e -> {
-            updateGrid();
-            showGame();
-            gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent keyEvent) {
-                    System.out.println(keyEvent.getText());
-                }
-            });
+            controller.startGame(state.getLevelId());
+            setupKeyListener();
         });
+    }
+
+    /**
+     * Setup keyboard input listener and delegate to controller
+     */
+    private void setupKeyListener() {
+        gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                Controller.KeyDirection direction = null;
+                
+                switch (keyEvent.getCode()) {
+                    case UP:
+                    case W:
+                        direction = Controller.KeyDirection.UP;
+                        break;
+                    case DOWN:
+                    case S:
+                        direction = Controller.KeyDirection.DOWN;
+                        break;
+                    case LEFT:
+                    case A:
+                        direction = Controller.KeyDirection.LEFT;
+                        break;
+                    case RIGHT:
+                    case D:
+                        direction = Controller.KeyDirection.RIGHT;
+                        break;
+                    default:
+                        break;
+                }
+                
+                if (direction != null) {
+                    controller.handleKeyPress(direction);
+                    keyEvent.consume();
+                }
+            }
+        });
+        
+        // Request focus for keyboard input
+        grid.requestFocus();
     }
 
     public void showMenu() {
@@ -116,7 +158,7 @@ public class Renderer {
                 addImage(layout[col][row], col, row);
             }
         }
-        addImage("Player", state.getPlayerY(), state.getPlayerX());
+        addImage("Player", state.getPlayerX(), state.getPlayerY());
     }
 
     private void addImage(String spt, int col, int row){
