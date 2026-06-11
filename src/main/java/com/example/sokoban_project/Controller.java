@@ -33,11 +33,12 @@ public class Controller {
      * Wird aufgerufen, wenn das Spiel gewonnen wurde
      */
     private void handleGameWon() {
-        System.out.println("🎉 LEVEL GEWONNEN!");
+        System.out.println(" LEVEL GEWONNEN!");
         if (onGameWon != null) {
             onGameWon.run();
         }
-        // Hier könnte später auch eine Animation oder Sound stattfinden
+        renderer.showLevelMenu();
+        gameLogic.restartLevel();
     }
 
     /**

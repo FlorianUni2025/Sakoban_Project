@@ -24,7 +24,7 @@ public class GameState {
 
         LevelParser lvlFile = new LevelParser();
         try {
-            levels = lvlFile.parseLevels("/Levels/levels.txt");
+            levels = lvlFile.parseLevels("/Levels/level.txt");
         }
         catch (IOException e){
             System.out.println(e.getMessage());
@@ -33,7 +33,6 @@ public class GameState {
     }
 
     public void reset(){
-        setLevelFlag(false);
         setLevel(levelId);
     }
 

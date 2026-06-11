@@ -22,8 +22,7 @@ public class GameLogic {
      * Restarts the current level
      */
     public void restartLevel() {
-        int currentLevelId = state.getLevelId();
-        state.setLevel(currentLevelId);
+        state.reset();
     }
 
     /**
