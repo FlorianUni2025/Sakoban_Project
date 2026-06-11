@@ -96,8 +96,9 @@ public class LevelParser {
                     case 'c': gameField[x][y] = null;
                               enityMap[x][y] = new Crates();break;
 
-                    case '*': gameField[x][y] = new Goal();
+                    case '*': Goal g = new Goal();
                               goals ++;
+                              gameField[x][y] = g;
                               enityMap[x][y] = null; break;
                 }
             }

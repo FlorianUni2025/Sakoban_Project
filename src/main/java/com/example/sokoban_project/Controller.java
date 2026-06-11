@@ -8,10 +8,12 @@ public class Controller {
     private GameLogic gameLogic;
     private Renderer renderer;
     private Runnable onGameWon;
+    private Timer timer;
 
     public Controller(GameLogic gameLogic, Renderer renderer) {
         this.gameLogic = gameLogic;
         this.renderer = renderer;
+        timer = new Timer();
     }
 
     /**
@@ -20,7 +22,7 @@ public class Controller {
     public void handleKeyPress(KeyDirection direction) {
         boolean success = gameLogic.movePlayer(direction);
         if (success) {
-            renderer.updateGrid();
+            //renderer.updateGrid();
             
             // Überprüfe nach jedem Move, ob das Spiel gewonnen wurde
             if (gameLogic.checkWinCondition()) {
@@ -71,6 +73,7 @@ public class Controller {
         gameLogic.loadLevel(levelId);
         renderer.showGame();
         renderer.updateGrid();
+        timer.run();
     }
 
     public enum KeyDirection {

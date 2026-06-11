@@ -16,6 +16,8 @@ public class Main extends Application {
         
         // Initialize View
         Renderer renderer = new Renderer(primaryStage, state);
+
+        GameLoop gameLoop = new GameLoop(renderer);
         
         // Initialize Controller and pass both model and view
         Controller controller = new Controller(gameLogic, renderer);
