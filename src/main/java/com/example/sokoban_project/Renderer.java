@@ -4,7 +4,9 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.image.Image;
@@ -14,6 +16,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.util.Optional;
+
 
 public class Renderer {
     private final Stage iStage;
@@ -22,6 +26,7 @@ public class Renderer {
     private Scene menuScene;
     private GameState state;
     private AssetManager assets;
+    private Controller controller;
     private int columns = 16;
     private int rows = 10;
     private double aspectRatio = 16.0 / 10.0;
@@ -47,7 +52,14 @@ public class Renderer {
 
         iStage.setTitle("Sokoban");
         setupMenu();
-        showMenu();
+        showMainMenu();
+    }
+
+    /**
+     * Set the controller to handle input events
+     */
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 
     private void setupMenu() {
@@ -62,15 +74,15 @@ public class Renderer {
 
         leftButton.setOnAction(e -> {
             int newLevel = state.getLevelId() - 1;
-            if (newLevel >= 1) {
-                state.setLevel(newLevel);
+            if (newLevel >= 0) {
+                controller.selectLevel(newLevel);
                 levelLabel.setText("Level: " + state.getLevelId());
             }
         });
 
         rightButton.setOnAction(e -> {
             int newLevel = state.getLevelId() + 1;
-            state.setLevel(newLevel);
+            controller.selectLevel(newLevel);
             levelLabel.setText("Level: " + state.getLevelId());
         });
 
@@ -81,23 +93,78 @@ public class Renderer {
 
         menuScene = new Scene(menuRoot, 400, 300);
 
-
         // Start-Button wechselt zur Game-Scene
         startButton.setOnAction(e -> {
-            updateGrid();
-            showGame();
-            gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent keyEvent) {
-                    System.out.println(keyEvent.getText());
-                }
-            });
+            controller.startGame(state.getLevelId());
+            setupKeyListener();
         });
     }
 
-    public void showMenu() {
+    /**
+     * Setup keyboard input listener and delegate to controller
+     */
+    private void setupKeyListener() {
+        gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                Controller.KeyDirection direction = null;
+                System.out.println(keyEvent.getCode());
+                switch (keyEvent.getCode()) {
+                    case UP:
+                    case W:
+                        direction = Controller.KeyDirection.UP;
+                        break;
+                    case DOWN:
+                    case S:
+                        direction = Controller.KeyDirection.DOWN;
+                        break;
+                    case LEFT:
+                    case A:
+                        direction = Controller.KeyDirection.LEFT;
+                        break;
+                    case RIGHT:
+                    case D:
+                        direction = Controller.KeyDirection.RIGHT;
+                        break;
+                    default:
+                        break;
+                }
+                
+                if (direction != null) {
+                    controller.handleKeyPress(direction);
+                    keyEvent.consume();
+                }
+            }
+        });
+        
+        // Request focus for keyboard input
+        grid.requestFocus();
+    }
+
+    public void showMainMenu() {
+        state.setLevelFlag(false);
         iStage.setScene(menuScene);
         iStage.show();
+    }
+
+    public void showLevelMenu(){
+        ButtonType mainMenuButton = new ButtonType("Hauptmenü");
+        ButtonType closeButton = new ButtonType("Schließen");
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Level geschafft");
+        alert.setHeaderText("Glückwunsch!");
+        alert.setContentText("Du hast das Level abgeschlossen.");
+
+        alert.getButtonTypes().setAll(mainMenuButton, closeButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == mainMenuButton) {
+                showMainMenu();
+            }
+        }
     }
 
     public void showGame() {
@@ -116,7 +183,11 @@ public class Renderer {
                 addImage(layout[col][row], col, row);
             }
         }
-        addImage("Player", state.getPlayerY(), state.getPlayerX());
+        addImage(state.getPlayerAsset(), state.getPlayerX(), state.getPlayerY());
+
+        if(state.getLevelFlag()){
+            showLevelMenu();
+        }
     }
 
     private void addImage(String spt, int col, int row){

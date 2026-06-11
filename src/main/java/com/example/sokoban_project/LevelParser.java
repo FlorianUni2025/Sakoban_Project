@@ -52,7 +52,6 @@ public class LevelParser {
      */
     private static Level parseLevel(BufferedReader reader, int levelId) throws IOException {
         String line;
-        int[] player = new int[2];
         
         // Read dimensions
         line = reader.readLine();
@@ -67,11 +66,12 @@ public class LevelParser {
         if (line == null) return null;
         line = line.trim();
         String[] playerPos = line.split(",");
-        player[0] = Integer.parseInt(playerPos[0]);
-        player[1] = Integer.parseInt(playerPos[1]);
+        Player player = new Player(Integer.parseInt(playerPos[1]), Integer.parseInt(playerPos[0]));
         
         // Read field
         Entity[][] gameField = new Entity[width][height];
+        Entity[][] enityMap = new Entity[width][height];
+        int goals = 0;
         
         for (int y = 0; y < height; y++) {
             line = reader.readLine();
@@ -87,15 +87,21 @@ public class LevelParser {
             char[] fieldChars = line.toCharArray();
             for (int x = 0; x < width && x < fieldChars.length; x++) {
                 switch (fieldChars[x]){
-                    case 'w': gameField[x][y] = new Wall(); break;
-                    case 'g': gameField[x][y] = new Ground(); break;
-                    case 'c': gameField[x][y] = new Crates(); break;
-                    case '*': gameField[x][y] = new Goal(); break;
+                    case 'w': gameField[x][y] = new Wall();
+                              enityMap[x][y] = null; break;
+
+                    case 'g': gameField[x][y] = new Ground();
+                              enityMap[x][y] = null; break;
+
+                    case 'c': gameField[x][y] = null;
+                              enityMap[x][y] = new Crates();break;
+
+                    case '*': gameField[x][y] = new Goal();
+                              goals ++;
+                              enityMap[x][y] = null; break;
                 }
             }
         }
-        Entity e = gameField[0][0];
-        System.out.println("Parser"+e.getAsset());
-        return new Level(levelId, width, height, player, gameField);
+        return new Level(levelId, width, height, goals, player, gameField, enityMap);
     }
 }
