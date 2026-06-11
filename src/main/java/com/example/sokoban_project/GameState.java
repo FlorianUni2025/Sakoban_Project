@@ -34,6 +34,7 @@ public class GameState {
 
     public void reset(){
         setLevel(levelId);
+        updateCrateAssets();
     }
 
     /**
@@ -48,6 +49,7 @@ public class GameState {
         this.gameField = level.getGameField();
         this.entityMap = level.getEnityMap();
         this.goals = level.getGoals();
+        updateCrateAssets();
 
     }
 
@@ -73,6 +75,30 @@ public class GameState {
         if(e != null){
             entityMap[2*x - player.getX()][2*y - player.getY()] = e;
             entityMap[x][y] = null;
+            updateCrateAssets();
+        }
+    }
+
+    /**
+     * Aktualisiert die Assets aller Crates basierend auf ihrer Position
+     * (ob sie auf einem Goal stehen oder nicht)
+     */
+    private void updateCrateAssets() {
+        for (int i = 0; i < x; i++) {
+            for (int j = 0; j < y; j++) {
+                Entity entity = entityMap[i][j];
+                Entity field = gameField[i][j];
+                
+                if (entity instanceof Crates) {
+                    Crates crate = (Crates) entity;
+                    // Prüfen ob eine Goal darunter liegt
+                    if (field instanceof Goal) {
+                        crate.setOnGoal(true);
+                    } else {
+                        crate.setOnGoal(false);
+                    }
+                }
+            }
         }
     }
 
