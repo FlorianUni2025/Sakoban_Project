@@ -64,27 +64,35 @@ public class GameLogic {
     }
 
     /**
-     * Validates if a move is legal
+     * Validates if a move is legal using Entity type checking
      */
     private boolean isValidMove(int x, int y) {
-        String[][] layout = state.getLayout();
-        String cellType = layout[x][y];
+        Entity[][] layout = state.getLayoutAsEntities();
+        Entity cell = layout[x][y];
 
-        return cellType != null && !cellType.equals("Wall") && !cellType.equals("Crates");
+        // Move is valid if cell is not a Wall and not a Crate
+        return !(cell instanceof Wall) && !(cell instanceof Crates);
     }
 
+    /**
+     * Checks if a position contains a pushable crate
+     */
     private boolean isPushable(int x, int y){
+        Entity[][] layout = state.getLayoutAsEntities();
+        Entity cell = layout[x][y];
+        
+        // Check if it's a crate
+        if (!(cell instanceof Crates)) {
+            return false;
+        }
 
-            boolean pushable = false;
-            String[][] layout = state.getLayout();
-            int newX = 2*x - state.getPlayerX();
-            int newY = 2*y - state.getPlayerY();
+        // Calculate where the crate would be pushed to
+        int newX = 2*x - state.getPlayerX();
+        int newY = 2*y - state.getPlayerY();
+        Entity targetCell = layout[newX][newY];
 
-            if(layout[x][y].equals("Crates")) {
-                pushable = !layout[newX][newY].equals("Wall") && !layout[newX][newY].equals("Crates");
-            }
-
-            return pushable;
+        // Crate can be pushed if target is not a wall and not another crate
+        return !(targetCell instanceof Wall) && !(targetCell instanceof Crates);
     }
 
     /**
