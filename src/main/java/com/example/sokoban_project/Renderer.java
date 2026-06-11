@@ -126,6 +126,11 @@ public class Renderer {
                     case D:
                         direction = Controller.KeyDirection.RIGHT;
                         break;
+                    case R:
+                        // Reset-Taste
+                        controller.restartLevel();
+                        keyEvent.consume();
+                        return;
                     default:
                         break;
                 }
