@@ -6,7 +6,6 @@ package com.example.sokoban_project;
  */
 public class GameLogic {
     private GameState state;
-    private int goalCount = 0;
 
     public GameLogic(GameState state) {
         this.state = state;
@@ -23,9 +22,7 @@ public class GameLogic {
      * Restarts the current level
      */
     public void restartLevel() {
-        int currentLevelId = state.getLevelId();
-        state.setLevel(currentLevelId);
-        goalCount = 0;
+        state.reset();
     }
 
     /**
@@ -55,15 +52,6 @@ public class GameLogic {
         // Check if move is valid (not out of bounds, not a wall, etc.)
         if (isValidMove(newX, newY)) {
             state.setPlayerPosition(newX, newY);
-
-            if(isGoal(newX, newY)){
-                goalCount++;
-                System.out.println(goalCount + "/" +state.getGoals());
-                if(goalCount == state.getGoals()){
-                    System.out.println("Goal");
-                    state.setLevelFlag(true);
-                }
-            }
             return true;
         }
         if(isPushable(newX, newY)){
@@ -76,42 +64,43 @@ public class GameLogic {
     }
 
     /**
-     * Validates if a move is legal
+     * Validates if a move is legal using Entity type checking
      */
     private boolean isValidMove(int x, int y) {
-        String[][] layout = state.getLayout();
-        String cellType = layout[x][y];
+        Entity[][] layout = state.getLayoutAsEntities();
+        Entity cell = layout[x][y];
 
-        return cellType != null && !cellType.equals("Wall") && !cellType.equals("Crates");
+        // Move is valid if cell is not a Wall and not a Crate
+        return !(cell instanceof Wall) && !(cell instanceof Crates);
     }
 
-    private boolean isGoal(int x, int y){
-        System.out.println("Goal?");
-        String[][] layout = state.getLayout();
+    /**
+     * Checks if a position contains a pushable crate
+     */
+    private boolean isPushable(int x, int y){
+        Entity[][] layout = state.getLayoutAsEntities();
+        Entity cell = layout[x][y];
+        
+        // Check if it's a crate
+        if (!(cell instanceof Crates)) {
+            return false;
+        }
+
+        // Calculate where the crate would be pushed to
         int newX = 2*x - state.getPlayerX();
         int newY = 2*y - state.getPlayerY();
-        String cellType = layout[x][y];
+        Entity targetCell = layout[newX][newY];
 
-        if (state.getGoals() == 1) {
-            return "Goal".equals(cellType);
-        }
-        System.out.println("Crates Goal:");
-        return "Crates".equals(cellType)
-                && "Goal".equals(layout[newX][newY]);
+        // Crate can be pushed if target is not a wall and not another crate
+        return !(targetCell instanceof Wall) && !(targetCell instanceof Crates);
     }
 
-    private boolean isPushable(int x, int y){
-
-            boolean pushable = false;
-            String[][] layout = state.getLayout();
-            int newX = 2*x - state.getPlayerX();
-            int newY = 2*y - state.getPlayerY();
-
-            if(layout[x][y].equals("Crates")) {
-                pushable = !layout[newX][newY].equals("Wall") && !layout[newX][newY].equals("Crates");
-            }
-
-            return pushable;
+    /**
+     * Überprüft den Gewinnzustand des Spiels
+     * @return true wenn das Level gewonnen wurde, false sonst
+     */
+    public boolean checkWinCondition() {
+        return state.isGameWon();
     }
 
     public GameState getState() {
