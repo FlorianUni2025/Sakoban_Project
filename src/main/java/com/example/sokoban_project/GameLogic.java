@@ -6,6 +6,7 @@ package com.example.sokoban_project;
  */
 public class GameLogic {
     private GameState state;
+    private int goalCount = 0;
 
     public GameLogic(GameState state) {
         this.state = state;
@@ -24,6 +25,7 @@ public class GameLogic {
     public void restartLevel() {
         int currentLevelId = state.getLevelId();
         state.setLevel(currentLevelId);
+        goalCount = 0;
     }
 
     /**
@@ -49,10 +51,23 @@ public class GameLogic {
                 newX += 1;
                 break;
         }
-        System.out.println(newY+ "" + newX);
+
         // Check if move is valid (not out of bounds, not a wall, etc.)
         if (isValidMove(newX, newY)) {
-            System.out.println("valid");
+            state.setPlayerPosition(newX, newY);
+
+            if(isGoal(newX, newY)){
+                goalCount++;
+                System.out.println(goalCount + "/" +state.getGoals());
+                if(goalCount == state.getGoals()){
+                    System.out.println("Goal");
+                    state.setLevelFlag(true);
+                }
+            }
+            return true;
+        }
+        if(isPushable(newX, newY)){
+            state.moveCrate(newX, newY);
             state.setPlayerPosition(newX, newY);
             return true;
         }
@@ -64,18 +79,39 @@ public class GameLogic {
      * Validates if a move is legal
      */
     private boolean isValidMove(int x, int y) {
-        // Check bounds
-        /*if (x < 0 || x >= state.getCol() || y < 0 || y >= state.getRow()) {
-            return false;
-        }*/
-
-        // Check if position is walkable (not a wall)
         String[][] layout = state.getLayout();
         String cellType = layout[x][y];
 
-        System.out.println(cellType);
+        return cellType != null && !cellType.equals("Wall") && !cellType.equals("Crates");
+    }
 
-        return cellType != null && !cellType.equals("Wall");
+    private boolean isGoal(int x, int y){
+        System.out.println("Goal?");
+        String[][] layout = state.getLayout();
+        int newX = 2*x - state.getPlayerX();
+        int newY = 2*y - state.getPlayerY();
+        String cellType = layout[x][y];
+
+        if (state.getGoals() == 1) {
+            return "Goal".equals(cellType);
+        }
+        System.out.println("Crates Goal:");
+        return "Crates".equals(cellType)
+                && "Goal".equals(layout[newX][newY]);
+    }
+
+    private boolean isPushable(int x, int y){
+
+            boolean pushable = false;
+            String[][] layout = state.getLayout();
+            int newX = 2*x - state.getPlayerX();
+            int newY = 2*y - state.getPlayerY();
+
+            if(layout[x][y].equals("Crates")) {
+                pushable = !layout[newX][newY].equals("Wall") && !layout[newX][newY].equals("Crates");
+            }
+
+            return pushable;
     }
 
     public GameState getState() {

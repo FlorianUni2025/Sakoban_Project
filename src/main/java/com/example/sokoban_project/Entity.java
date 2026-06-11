@@ -34,7 +34,7 @@ class Player extends Entity{
         {
             this.asset = "Left_Player";
         }
-        else{
+        if(x > this.x){
             this.asset = "Right_Player";
         }
         this.x = x;
@@ -45,7 +45,7 @@ class Player extends Entity{
         {
             this.asset = "Up_Player";
         }
-        else{
+        if(y > this.y){
             this.asset = "Down_Player";
         }
         this.y = y;
@@ -75,7 +75,17 @@ class Crates extends Entity{
 }
 
 class Goal extends Entity{
+    private boolean activated = false;
+
     Goal(){
         super("Goal");
+    }
+
+    public void setActivated(boolean activated) {
+        this.activated = activated;
+    }
+
+    public boolean getActivated(){
+        return activated;
     }
 }

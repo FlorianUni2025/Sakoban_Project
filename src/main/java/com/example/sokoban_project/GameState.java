@@ -5,33 +5,37 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.BiConsumer;
 
-public class GameState {
-    private Entity field [][];
+import static java.lang.Math.abs;
 
+public class GameState {
+    private Entity gameField [][];
+    private Entity entityMap [][];
     private List<Level> levels;
     private int x;
     private int y;
-    private int levelId;
+    private static int levelId;
     private Player player;
+    private int goals;
 
 
 
     GameState(int x, int y)  {
         this.x = x;
         this.y = y;
-        field = new Entity[x][y];
+
         LevelParser lvlFile = new LevelParser();
         try {
-            levels = lvlFile.parseLevels("/Levels/level.txt");
+            levels = lvlFile.parseLevels("/Levels/levels.txt");
         }
         catch (IOException e){
             System.out.println(e.getMessage());
         }
 
-        updateField(
-                (Integer i, Integer j)->(true),
-                (Integer i, Integer j)-> field [i][j] = new Wall()
-        );
+    }
+
+    public void reset(){
+        setLevelFlag(false);
+        setLevel(levelId);
     }
 
     /**
@@ -43,10 +47,10 @@ public class GameState {
         this.x = level.getWidth();
         this.y = level.getHeight();
         this.player = level.getPlayer();
-        this.field = level.getGameField();
+        this.gameField = level.getGameField();
+        this.entityMap = level.getEnityMap();
+        this.goals = level.getGoals();
 
-        Entity e = field[0][0];
-        System.out.println("State"+e.getAsset());
     }
 
     /**
@@ -57,11 +61,31 @@ public class GameState {
         this.player.setY(y);
     }
 
+    public void setLevelFlag(boolean complete){
+        levels.get(levelId).setFlag(complete);
+    }
+
+    public boolean getLevelFlag(){
+        return levels.get(levelId).getFlag();
+    }
+
+
+    public void moveCrate(int x, int y){
+        Entity e = entityMap[x][y];
+        if(e != null){
+            entityMap[2*x - player.getX()][2*y - player.getY()] = e;
+            entityMap[x][y] = null;
+        }
+    }
+
     /**
      * Gets the current level ID (key for the renderer)
      */
     public int getLevelId() {
         return levelId;
+    }
+    public int getGoals() {
+        return goals;
     }
 
     public int getPlayerX() {
@@ -74,31 +98,31 @@ public class GameState {
 
 
 
-    public void updateField(BiPredicate<Integer, Integer> con, BiConsumer<Integer, Integer> action){
-        for(int i=0; i<x; i++){
-            for(int j=0; j<y; j++){
-                if(con.test(i,j)){
-                    action.accept(i, j);
-                }
-            }
-        }
-    }
-
     public String[][] getLayout(){
         String[][] keys = new String[x][y];
         setLevel(levelId);
 
         for(int i=0; i<x; i++){
             for(int j=0; j<y; j++){
-                Entity e = field [i][j];
-                if(e != null){keys[i][j] = e.getAsset();}
+                Entity field = gameField [i][j];
+                Entity e = entityMap [i][j];
+
+                if(field != null){
+                    keys[i][j] = field.getAsset();
+                }
                 else{
                     keys[i][j] = "Ground";
-                    System.out.println("Not defined element");
+                }
+                if(e != null){
+                    keys[i][j] = e.getAsset();
                 }
             }
         }
         return keys;
+    }
+
+    public String getPlayerAsset(){
+        return player.getAsset();
     }
 
 

@@ -3,23 +3,37 @@ package com.example.sokoban_project;
 public class Level {
     private int id;
     private Entity[][] gameField;
+    private Entity[][] enityMap;
     private Player player;
     private int width;
     private int height;
+    private boolean levelFlag;
+    private int goals;
 
-    public Level(int id, int width, int height, Player player, Entity[][] gameField) {
+    public Level(int id, int width, int height, int goals, Player player, Entity[][] gameField, Entity[][] enityMap) {
         this.id = id;
         this.width = width;
         this.height = height;
         this.player = player;
         this.gameField = gameField;
+        this.enityMap = enityMap;
+        this.goals = goals;
+    }
 
-        Entity e = gameField[0][0];
-        System.out.println("Level"+e.getAsset());
+    public void setFlag(boolean complete){
+        levelFlag = complete;
+    }
+
+    public boolean getFlag(){
+        return levelFlag;
     }
 
     public int getId() {
         return id;
+    }
+
+    public int getGoals() {
+        return goals;
     }
 
     public void setId(int id) {
@@ -28,6 +42,10 @@ public class Level {
 
     public Entity[][] getGameField() {
         return gameField;
+    }
+
+    public Entity[][] getEnityMap() {
+        return enityMap;
     }
 
     public Player getPlayer() {

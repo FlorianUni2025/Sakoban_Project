@@ -17,7 +17,9 @@ public class AssetManager {
         Image right = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_right.png")));
         Image ground = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/ground.png")));
         Image crates = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate.png")));
-        Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
+        //Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
+        Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate_target.png")));
+
 
         sprites.put(
                 "Wall",

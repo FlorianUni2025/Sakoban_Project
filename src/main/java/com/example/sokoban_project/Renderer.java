@@ -4,7 +4,9 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.image.Image;
@@ -13,6 +15,8 @@ import javafx.stage.Stage;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
+import java.util.Optional;
 
 
 public class Renderer {
@@ -48,7 +52,7 @@ public class Renderer {
 
         iStage.setTitle("Sokoban");
         setupMenu();
-        showMenu();
+        showMainMenu();
     }
 
     /**
@@ -137,9 +141,30 @@ public class Renderer {
         grid.requestFocus();
     }
 
-    public void showMenu() {
+    public void showMainMenu() {
+        state.setLevelFlag(false);
         iStage.setScene(menuScene);
         iStage.show();
+    }
+
+    public void showLevelMenu(){
+        ButtonType mainMenuButton = new ButtonType("Hauptmenü");
+        ButtonType closeButton = new ButtonType("Schließen");
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Level geschafft");
+        alert.setHeaderText("Glückwunsch!");
+        alert.setContentText("Du hast das Level abgeschlossen.");
+
+        alert.getButtonTypes().setAll(mainMenuButton, closeButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == mainMenuButton) {
+                showMainMenu();
+            }
+        }
     }
 
     public void showGame() {
@@ -158,7 +183,11 @@ public class Renderer {
                 addImage(layout[col][row], col, row);
             }
         }
-        addImage("Player", state.getPlayerX(), state.getPlayerY());
+        addImage(state.getPlayerAsset(), state.getPlayerX(), state.getPlayerY());
+
+        if(state.getLevelFlag()){
+            showLevelMenu();
+        }
     }
 
     private void addImage(String spt, int col, int row){
