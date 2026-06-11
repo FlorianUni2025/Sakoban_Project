@@ -34,7 +34,6 @@ public class GameState {
 
     public void reset(){
         setLevel(levelId);
-        updateCrateAssets();
     }
 
     /**
@@ -186,6 +185,40 @@ public class GameState {
         return false;
     }
 
+    /**
+     * Gibt das kombinierte Layout als Entity-Array zurück
+     * (Kombination aus gameField und entityMap - höhere Ebene hat Vorrang)
+     */
+    public Entity[][] getLayoutAsEntities() {
+        Entity[][] layout = new Entity[x][y];
+
+        for(int i=0; i<x; i++){
+            for(int j=0; j<y; j++){
+                Entity field = gameField[i][j];
+                Entity e = entityMap[i][j];
+
+                // Zuerst das Feld (Background)
+                layout[i][j] = field;
+                
+                // Dann die Entity (Foreground) - hat Vorrang
+                if(e != null){
+                    layout[i][j] = e;
+                }
+                
+                // Wenn nichts, dann Ground
+                if(layout[i][j] == null){
+                    layout[i][j] = new Ground();
+                }
+            }
+        }
+        return layout;
+    }
+
+    /**
+     * @deprecated Verwende getLayoutAsEntities() stattdessen
+     * Gibt das Layout als String-Array für die Renderer zurück
+     */
+    @Deprecated
     public String[][] getLayout(){
         String[][] keys = new String[x][y];
         setLevel(levelId);
