@@ -1,9 +1,8 @@
 package com.example.sokoban_project;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiPredicate;
-import java.util.function.BiConsumer;
 
 import static java.lang.Math.abs;
 
@@ -96,7 +95,71 @@ public class GameState {
         return player.getY();
     }
 
+    /**
+     * Zählt alle Crates, die auf Goals stehen
+     */
+    public int countCratesOnGoals() {
+        int cratesOnGoals = 0;
+        
+        for (int i = 0; i < x; i++) {
+            for (int j = 0; j < y; j++) {
+                // Eine Crate auf einem Goal wird erkannt, wenn:
+                // 1. Die Entität eine Crate ist
+                // 2. Darunter ein Goal liegt
+                Entity entity = entityMap[i][j];
+                Entity field = gameField[i][j];
+                
+                if (entity instanceof Crates && field instanceof Goal) {
+                    cratesOnGoals++;
+                }
+            }
+        }
+        return cratesOnGoals;
+    }
 
+    /**
+     * Gibt alle Goal-Positionen als Liste zurück
+     */
+    public List<int[]> getGoalPositions() {
+        List<int[]> goalPositions = new ArrayList<>();
+        
+        for (int i = 0; i < x; i++) {
+            for (int j = 0; j < y; j++) {
+                if (gameField[i][j] instanceof Goal) {
+                    goalPositions.add(new int[]{i, j});
+                }
+            }
+        }
+        return goalPositions;
+    }
+
+    /**
+     * Überprüft, ob das Spiel gewonnen wurde
+     * - 1 Goal: Spieler muss darauf stehen
+     * - Mehrere Goals: Auf jedem Goal muss eine Crate stehen
+     * @return true wenn das Level gewonnen wurde, false sonst
+     */
+    public boolean isGameWon() {
+        int totalGoals = getGoals();
+        
+        // Fall 1: Nur 1 Goal - Spieler muss darauf stehen
+        if (totalGoals == 1) {
+            for (int[] goalPos : getGoalPositions()) {
+                if (player.getX() == goalPos[0] && player.getY() == goalPos[1]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Fall 2: Mehrere Goals - Auf jedem muss eine Crate stehen
+        if (totalGoals > 1) {
+            int cratesOnGoals = countCratesOnGoals();
+            return cratesOnGoals == totalGoals;
+        }
+        
+        return false;
+    }
 
     public String[][] getLayout(){
         String[][] keys = new String[x][y];
