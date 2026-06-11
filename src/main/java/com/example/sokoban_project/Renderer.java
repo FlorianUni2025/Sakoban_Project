@@ -176,18 +176,23 @@ public class Renderer {
         iStage.setScene(gameScene);
     }
 
+    /**
+     * Updates the game grid by rendering all entities
+     */
     public void updateGrid() {
         grid.getChildren().clear();
-        String[][] layout = state.getLayout();
+        Entity[][] layout = state.getLayoutAsEntities();
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < columns; col++) {
-                if (layout[col][row] == null) {
-                    continue;
+                Entity entity = layout[col][row];
+                if (entity != null) {
+                    addImage(entity.getAsset(), col, row);
                 }
-                addImage(layout[col][row], col, row);
             }
         }
+        
+        // Player is rendered on top
         addImage(state.getPlayerAsset(), state.getPlayerX(), state.getPlayerY());
 
         if(state.getLevelFlag()){
@@ -195,8 +200,11 @@ public class Renderer {
         }
     }
 
-    private void addImage(String spt, int col, int row){
-        Image image = assets.get(spt);
+    /**
+     * Adds an image to the grid at the specified position
+     */
+    private void addImage(String assetName, int col, int row){
+        Image image = assets.get(assetName);
         ImageView imageView = new ImageView(image);
         imageView.setPreserveRatio(true);
 
