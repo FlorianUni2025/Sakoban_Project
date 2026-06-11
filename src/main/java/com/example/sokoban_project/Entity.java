@@ -69,8 +69,24 @@ class Ground extends Entity{
 }
 
 class Crates extends Entity{
+    private boolean onGoal = false;
+
     Crates(){
         super("Crates");
+    }
+
+    public void setOnGoal(boolean onGoal) {
+        this.onGoal = onGoal;
+        // Asset wechseln je nachdem ob auf Goal oder nicht
+        if (onGoal) {
+            this.asset = "Crates_On_Goal";
+        } else {
+            this.asset = "Crates";
+        }
+    }
+
+    public boolean isOnGoal() {
+        return onGoal;
     }
 }
 
