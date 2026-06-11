@@ -97,6 +97,10 @@ class Goal extends Entity{
         super("Goal");
     }
 
+    public void setSingleMode(){
+        this.asset = "Single_Goal";
+    }
+
     public void setActivated(boolean activated) {
         this.activated = activated;
     }

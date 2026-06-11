@@ -16,8 +16,9 @@ public class AssetManager {
         Image left = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_left.png")));
         Image right = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_right.png")));
         Image ground = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/ground.png")));
-        Image crates = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate.png")));
-        //Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
+        Image crates = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate_on_target.png")));
+        Image cratesGoal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate.png")));
+        Image singleGoal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
         Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate_target.png")));
 
 
@@ -52,8 +53,16 @@ public class AssetManager {
                 crates
         );
         sprites.put(
+                "Crates_On_Goal",
+                cratesGoal
+        );
+        sprites.put(
                 "Goal",
                 goal
+        );
+        sprites.put(
+                "Single_Goal",
+                singleGoal
         );
     }
 

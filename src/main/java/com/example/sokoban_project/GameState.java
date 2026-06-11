@@ -33,6 +33,7 @@ public class GameState {
     }
 
     public void reset(){
+        levels.get(levelId).resetToOriginal();
         setLevel(levelId);
     }
 
@@ -92,9 +93,9 @@ public class GameState {
                     Crates crate = (Crates) entity;
                     // Prüfen ob eine Goal darunter liegt
                     if (field instanceof Goal) {
-                        crate.setOnGoal(true);
-                    } else {
                         crate.setOnGoal(false);
+                    } else {
+                        crate.setOnGoal(true);
                     }
                 }
             }
