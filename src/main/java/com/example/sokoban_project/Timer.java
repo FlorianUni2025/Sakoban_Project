@@ -1,27 +1,33 @@
 package com.example.sokoban_project;
-
 public class Timer extends Thread {
-    private static int time = 0;
-    @Override
-    public void run(){
-        try {
-            sleep(1000);
-            time++;
 
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    private long startTime;
+    private boolean running;
+
+    @Override
+    public void run() {
+        startTime = System.nanoTime();
+        running = true;
     }
 
-    public String getTimeString(){
-        int mTime = time;
+    public void stopTimer() {
+        running = false;
+        this.interrupt();
+    }
 
-        int s = mTime%60;
-        mTime = mTime/60;
-        int m = mTime%60;
-        mTime = mTime/60;
-        int h = mTime%60;
+    public String getTime() {
+        if (!running) {
+            return "00:00:00";
+        }
 
-        return h + ":" + m + ":" + s;
+        long elapsedSeconds =
+                (System.nanoTime() - startTime) / 1_000_000_000L;
+
+        long hours = elapsedSeconds / 3600;
+        long minutes = (elapsedSeconds % 3600) / 60;
+        long seconds = elapsedSeconds % 60;
+
+        return String.format("%02d:%02d:%02d",
+                hours, minutes, seconds);
     }
 }

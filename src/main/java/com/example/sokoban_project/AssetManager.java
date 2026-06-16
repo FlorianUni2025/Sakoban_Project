@@ -21,11 +21,10 @@ public class AssetManager {
         Image singleGoal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
         Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate_target.png")));
 
-
-        sprites.put(
-                "Wall",
-                wall
-        );
+                sprites.put(
+                        "Wall",
+                        wall
+                );
 
         sprites.put(
                 "Down_Player",
