@@ -5,13 +5,14 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -38,11 +39,14 @@ public class Renderer implements Runnable{
     private HBox hbox;
     private Label labelTime;
     private Label labelSteps;
+    private StackPane stack;
+    private Canvas canvas;
 
     @Override
     public void run() {
         while(!state.isGameWon()){
             Platform.runLater(() -> {
+
                 updateGrid();
                 setInfo();
             });
@@ -64,11 +68,16 @@ public class Renderer implements Runnable{
 
 
         grid = new GridPane();
+        stack = new StackPane();
+        canvas = new Canvas();
+
         hbox.setAlignment(Pos.CENTER);
         hbox.getChildren().addAll(labelTime, labelSteps);
         vbox.getChildren().addAll(hbox, grid);
 
-        gameScene = new Scene(vbox);
+        stack.getChildren().addAll(vbox, canvas);
+
+        gameScene = new Scene(stack);
 
         grid.setAlignment(Pos.CENTER);
 
@@ -217,6 +226,20 @@ public class Renderer implements Runnable{
                 .bind(grid.heightProperty().divide(rows));
 
         grid.add(imageView, col, row);
+    }
+
+    private void animatePlayer(String assetName){
+        int i = 1;
+        Image image = assets.getAnimation(assetName, i);
+        ImageView imageView = new ImageView(image);
+        imageView.setPreserveRatio(true);
+
+        imageView.fitWidthProperty()
+                .bind(grid.widthProperty().divide(columns));
+        imageView.fitHeightProperty()
+                .bind(grid.heightProperty().divide(rows));
+
+        canvas.getGraphicsContext2D().drawImage(image, grid.get*state.getPlayerX(), *state.getPlayerY());
     }
 
     public GridPane getRoot() {

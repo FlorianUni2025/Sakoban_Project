@@ -20,6 +20,7 @@ public class Controller {
         this.gameLogic = gameLogic;
         this.renderer = renderer;
         guiThread = new Thread(renderer);
+        guiThread.setDaemon(true);
     }
 
 
@@ -47,6 +48,7 @@ public class Controller {
         setupKeyListener();
         renderer.showGame();
         guiThread = new Thread(renderer);
+        guiThread.setDaemon(true);
         guiThread.start();
     }
 
@@ -62,7 +64,7 @@ public class Controller {
         renderer.setupKeyListener(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
-                Controller.KeyDirection direction = null;
+                KeyDirection direction = null;
                 System.out.println(keyEvent.getCode());
                 switch (keyEvent.getCode()) {
                     case UP:
