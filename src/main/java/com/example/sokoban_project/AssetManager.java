@@ -24,11 +24,12 @@ public class AssetManager {
         Image singleGoal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
         Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate_target.png")));
 
-
+        Image test = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_down" + 1 + ".png")));
 
 
         List <Image> downMovement = IntStream.range(1,3)
                 .mapToObj(i -> {
+                    System.out.println("/Images/player_anim_down" + i + ".png");
                     return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_down" + i + ".png")));
                 }).toList();
 
@@ -48,23 +49,22 @@ public class AssetManager {
                 }).toList();
 
 
+
+
         animations.put(
-                "down",
+                "Down_Player",
                 downMovement
         );
-
         animations.put(
-                "up",
+                "Up_Player",
                 upMovement
         );
-
         animations.put(
-                "left",
+                "Left_Player",
                 leftMovement
         );
-
         animations.put(
-                "right",
+                "Right_Player",
                 rightMovement
         );
 

@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -13,6 +14,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -71,13 +73,18 @@ public class Renderer implements Runnable{
         stack = new StackPane();
         canvas = new Canvas();
 
+        canvas.widthProperty().bind(grid.widthProperty());
+        canvas.heightProperty().bind(grid.heightProperty());
+
         hbox.setAlignment(Pos.CENTER);
         hbox.getChildren().addAll(labelTime, labelSteps);
-        vbox.getChildren().addAll(hbox, grid);
 
-        stack.getChildren().addAll(vbox, canvas);
+        stack.getChildren().addAll(grid, canvas);
+        StackPane.setAlignment(canvas, Pos.TOP_CENTER);
 
-        gameScene = new Scene(stack);
+        vbox.getChildren().addAll(hbox, stack);
+
+        gameScene = new Scene(vbox);
 
         grid.setAlignment(Pos.CENTER);
 
@@ -205,7 +212,8 @@ public class Renderer implements Runnable{
         }
         
         // Player is rendered on top
-        addImage(state.getPlayerAsset(), state.getPlayerX(), state.getPlayerY());
+        //addImage(state.getPlayerAsset(), state.getPlayerX(), state.getPlayerY());
+        animatePlayer();
 
         if(state.getLevelFlag()){
             showLevelMenu();
@@ -228,9 +236,12 @@ public class Renderer implements Runnable{
         grid.add(imageView, col, row);
     }
 
-    private void animatePlayer(String assetName){
-        int i = 1;
-        Image image = assets.getAnimation(assetName, i);
+    private void animatePlayer(){
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        int i = 0;
+        Image image = assets.getAnimation(state.getPlayerAsset(), i);
         ImageView imageView = new ImageView(image);
         imageView.setPreserveRatio(true);
 
@@ -238,8 +249,9 @@ public class Renderer implements Runnable{
                 .bind(grid.widthProperty().divide(columns));
         imageView.fitHeightProperty()
                 .bind(grid.heightProperty().divide(rows));
-
-        canvas.getGraphicsContext2D().drawImage(image, grid.get*state.getPlayerX(), *state.getPlayerY());
+        //grid.add(imageView, 2, 1);
+        gc.drawImage(image, (grid.getWidth()/columns)*state.getPlayerX(),
+                                           (grid.getHeight()/rows)*state.getPlayerY());
     }
 
     public GridPane getRoot() {
