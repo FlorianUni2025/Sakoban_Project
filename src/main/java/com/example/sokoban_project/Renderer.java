@@ -1,5 +1,6 @@
 package com.example.sokoban_project;
 
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,8 +19,10 @@ import javafx.scene.layout.VBox;
 
 import java.util.Optional;
 
+import static java.lang.Thread.sleep;
 
-public class Renderer {
+
+public class Renderer implements Runnable{
     private final Stage iStage;
     private GridPane grid = new GridPane();
     private Scene gameScene;
@@ -30,14 +33,42 @@ public class Renderer {
     private int columns = 16;
     private int rows = 10;
     private double aspectRatio = 16.0 / 10.0;
+    private Timer time;
+    private VBox vbox;
+    private HBox hbox;
+    private Label labelTime;
+    private Label labelSteps;
+
+    @Override
+    public void run() {
+        while(!state.isGameWon()){
+            Platform.runLater(() -> {
+                updateGrid();
+                setInfo();
+            });
+            try{
+                Thread.sleep(16);
+            }catch (InterruptedException e){break;}
+        }
+    }
 
     public Renderer(Stage iStage, GameState state) {
         this.state = state;
         this.assets = new AssetManager();
         this.iStage = iStage;
+        vbox = new VBox(20);
+        hbox = new HBox(20);
+        labelTime = new Label("Time: 00:00:00");
+        labelSteps = new Label("Steps: 0");
+        time = new Timer();
+
 
         grid = new GridPane();
-        gameScene = new Scene(grid);
+        hbox.setAlignment(Pos.CENTER);
+        hbox.getChildren().addAll(labelTime, labelSteps);
+        vbox.getChildren().addAll(hbox, grid);
+
+        gameScene = new Scene(vbox);
 
         grid.setAlignment(Pos.CENTER);
 
@@ -54,6 +85,10 @@ public class Renderer {
         setupMenu();
         showMainMenu();
     }
+    public void setInfo(){
+        labelTime.setText("Time: " + time.getTime());
+        labelSteps.setText("Steps: " + state.getSteps());
+    }
 
     /**
      * Set the controller to handle input events
@@ -61,6 +96,7 @@ public class Renderer {
     public void setController(Controller controller) {
         this.controller = controller;
     }
+
 
     private void setupMenu() {
         Button startButton = new Button("Spiel starten");
@@ -96,57 +132,21 @@ public class Renderer {
         // Start-Button wechselt zur Game-Scene
         startButton.setOnAction(e -> {
             controller.startGame(state.getLevelId());
-            setupKeyListener();
         });
     }
 
     /**
      * Setup keyboard input listener and delegate to controller
      */
-    private void setupKeyListener() {
-        gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                Controller.KeyDirection direction = null;
-                System.out.println(keyEvent.getCode());
-                switch (keyEvent.getCode()) {
-                    case UP:
-                    case W:
-                        direction = Controller.KeyDirection.UP;
-                        break;
-                    case DOWN:
-                    case S:
-                        direction = Controller.KeyDirection.DOWN;
-                        break;
-                    case LEFT:
-                    case A:
-                        direction = Controller.KeyDirection.LEFT;
-                        break;
-                    case RIGHT:
-                    case D:
-                        direction = Controller.KeyDirection.RIGHT;
-                        break;
-                    case R:
-                        // Reset-Taste
-                        controller.restartLevel();
-                        keyEvent.consume();
-                        return;
-                    default:
-                        break;
-                }
-                
-                if (direction != null) {
-                    controller.handleKeyPress(direction);
-                    keyEvent.consume();
-                }
-            }
-        });
-        
+    public void setupKeyListener(EventHandler keyHandler) {;
+        gameScene.setOnKeyPressed(keyHandler);
+
         // Request focus for keyboard input
         grid.requestFocus();
     }
 
     public void showMainMenu() {
+        time.stopTimer();
         state.setLevelFlag(false);
         iStage.setScene(menuScene);
         iStage.show();
@@ -174,6 +174,9 @@ public class Renderer {
 
     public void showGame() {
         iStage.setScene(gameScene);
+        updateGrid();
+        time = new Timer();
+        time.start();
     }
 
     /**

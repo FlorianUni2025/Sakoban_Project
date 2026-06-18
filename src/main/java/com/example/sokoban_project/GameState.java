@@ -15,6 +15,7 @@ public class GameState {
     private static int levelId;
     private Player player;
     private int goals;
+    private static int steps;
 
 
 
@@ -33,8 +34,10 @@ public class GameState {
     }
 
     public void reset(){
+        System.out.println("RS");
         levels.get(levelId).resetToOriginal();
         setLevel(levelId);
+        steps = 0;
     }
 
     /**
@@ -118,6 +121,14 @@ public class GameState {
 
     public int getPlayerY() {
         return player.getY();
+    }
+
+    public void incSteps(){
+        steps++;
+    }
+
+    public int getSteps(){
+        return steps;
     }
 
     /**

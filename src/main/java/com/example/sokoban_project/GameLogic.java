@@ -21,9 +21,7 @@ public class GameLogic {
     /**
      * Restarts the current level
      */
-    public void restartLevel() {
-        state.reset();
-    }
+    public void restartLevel() {state.reset();}
 
     /**
      * Moves the player in the given direction.
@@ -52,11 +50,13 @@ public class GameLogic {
         // Check if move is valid (not out of bounds, not a wall, etc.)
         if (isValidMove(newX, newY)) {
             state.setPlayerPosition(newX, newY);
+            state.incSteps();
             return true;
         }
         if(isPushable(newX, newY)){
             state.moveCrate(newX, newY);
             state.setPlayerPosition(newX, newY);
+            state.incSteps();
             return true;
         }
 
