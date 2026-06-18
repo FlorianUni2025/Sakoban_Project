@@ -33,11 +33,19 @@ public class Renderer implements Runnable{
     private int columns = 16;
     private int rows = 10;
     private double aspectRatio = 16.0 / 10.0;
+    private Timer time;
+    private VBox vbox;
+    private HBox hbox;
+    private Label labelTime;
+    private Label labelSteps;
 
     @Override
     public void run() {
         while(!state.isGameWon()){
-            Platform.runLater(() -> updateGrid());
+            Platform.runLater(() -> {
+                updateGrid();
+                setInfo();
+            });
             try{
                 Thread.sleep(16);
             }catch (InterruptedException e){break;}
@@ -48,9 +56,19 @@ public class Renderer implements Runnable{
         this.state = state;
         this.assets = new AssetManager();
         this.iStage = iStage;
+        vbox = new VBox(20);
+        hbox = new HBox(20);
+        labelTime = new Label("Time: 00:00:00");
+        labelSteps = new Label("Steps: 0");
+        time = new Timer();
+
 
         grid = new GridPane();
-        gameScene = new Scene(grid);
+        hbox.setAlignment(Pos.CENTER);
+        hbox.getChildren().addAll(labelTime, labelSteps);
+        vbox.getChildren().addAll(hbox, grid);
+
+        gameScene = new Scene(vbox);
 
         grid.setAlignment(Pos.CENTER);
 
@@ -67,6 +85,10 @@ public class Renderer implements Runnable{
         setupMenu();
         showMainMenu();
     }
+    public void setInfo(){
+        labelTime.setText("Time: " + time.getTime());
+        labelSteps.setText("Steps: " + state.getSteps());
+    }
 
     /**
      * Set the controller to handle input events
@@ -74,6 +96,7 @@ public class Renderer implements Runnable{
     public void setController(Controller controller) {
         this.controller = controller;
     }
+
 
     private void setupMenu() {
         Button startButton = new Button("Spiel starten");
@@ -123,6 +146,7 @@ public class Renderer implements Runnable{
     }
 
     public void showMainMenu() {
+        time.stopTimer();
         state.setLevelFlag(false);
         iStage.setScene(menuScene);
         iStage.show();
@@ -151,6 +175,8 @@ public class Renderer implements Runnable{
     public void showGame() {
         iStage.setScene(gameScene);
         updateGrid();
+        time = new Timer();
+        time.start();
     }
 
     /**

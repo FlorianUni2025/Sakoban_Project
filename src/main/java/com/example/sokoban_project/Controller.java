@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Controller handles all user input and commands the GameLogic.
  * It acts as a bridge between the View (Renderer) and Model (GameLogic).
@@ -44,6 +46,7 @@ public class Controller {
         gameLogic.loadLevel(levelId);
         setupKeyListener();
         renderer.showGame();
+        guiThread = new Thread(renderer);
         guiThread.start();
     }
 
@@ -112,6 +115,8 @@ public class Controller {
         if (onGameWon != null) {
             onGameWon.run();
         }
+        renderer.updateGrid();
+        renderer.setInfo();
         guiThread.interrupt();
         renderer.showLevelMenu();
         gameLogic.restartLevel();

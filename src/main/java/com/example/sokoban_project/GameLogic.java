@@ -50,11 +50,13 @@ public class GameLogic {
         // Check if move is valid (not out of bounds, not a wall, etc.)
         if (isValidMove(newX, newY)) {
             state.setPlayerPosition(newX, newY);
+            state.incSteps();
             return true;
         }
         if(isPushable(newX, newY)){
             state.moveCrate(newX, newY);
             state.setPlayerPosition(newX, newY);
+            state.incSteps();
             return true;
         }
 
