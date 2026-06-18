@@ -33,6 +33,7 @@ public class GameState {
     }
 
     public void reset(){
+        System.out.println("RS");
         levels.get(levelId).resetToOriginal();
         setLevel(levelId);
     }

@@ -1,5 +1,6 @@
 package com.example.sokoban_project;
 
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,8 +19,10 @@ import javafx.scene.layout.VBox;
 
 import java.util.Optional;
 
+import static java.lang.Thread.sleep;
 
-public class Renderer {
+
+public class Renderer implements Runnable{
     private final Stage iStage;
     private GridPane grid = new GridPane();
     private Scene gameScene;
@@ -30,6 +33,16 @@ public class Renderer {
     private int columns = 16;
     private int rows = 10;
     private double aspectRatio = 16.0 / 10.0;
+
+    @Override
+    public void run() {
+        while(!state.isGameWon()){
+            Platform.runLater(() -> updateGrid());
+            try{
+                Thread.sleep(16);
+            }catch (InterruptedException e){break;}
+        }
+    }
 
     public Renderer(Stage iStage, GameState state) {
         this.state = state;
@@ -96,52 +109,15 @@ public class Renderer {
         // Start-Button wechselt zur Game-Scene
         startButton.setOnAction(e -> {
             controller.startGame(state.getLevelId());
-            setupKeyListener();
         });
     }
 
     /**
      * Setup keyboard input listener and delegate to controller
      */
-    private void setupKeyListener() {
-        gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                Controller.KeyDirection direction = null;
-                System.out.println(keyEvent.getCode());
-                switch (keyEvent.getCode()) {
-                    case UP:
-                    case W:
-                        direction = Controller.KeyDirection.UP;
-                        break;
-                    case DOWN:
-                    case S:
-                        direction = Controller.KeyDirection.DOWN;
-                        break;
-                    case LEFT:
-                    case A:
-                        direction = Controller.KeyDirection.LEFT;
-                        break;
-                    case RIGHT:
-                    case D:
-                        direction = Controller.KeyDirection.RIGHT;
-                        break;
-                    case R:
-                        // Reset-Taste
-                        controller.restartLevel();
-                        keyEvent.consume();
-                        return;
-                    default:
-                        break;
-                }
-                
-                if (direction != null) {
-                    controller.handleKeyPress(direction);
-                    keyEvent.consume();
-                }
-            }
-        });
-        
+    public void setupKeyListener(EventHandler keyHandler) {;
+        gameScene.setOnKeyPressed(keyHandler);
+
         // Request focus for keyboard input
         grid.requestFocus();
     }
@@ -174,6 +150,7 @@ public class Renderer {
 
     public void showGame() {
         iStage.setScene(gameScene);
+        updateGrid();
     }
 
     /**

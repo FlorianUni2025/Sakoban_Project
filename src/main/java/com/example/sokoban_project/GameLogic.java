@@ -21,9 +21,7 @@ public class GameLogic {
     /**
      * Restarts the current level
      */
-    public void restartLevel() {
-        state.reset();
-    }
+    public void restartLevel() {state.reset();}
 
     /**
      * Moves the player in the given direction.
