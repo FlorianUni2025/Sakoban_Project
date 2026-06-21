@@ -9,118 +9,160 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-
-import java.util.Optional;
-
-import static java.lang.Thread.sleep;
 
 
-public class Renderer implements Runnable{
+public class Renderer implements Runnable {
+
     private final Stage iStage;
-    private GridPane grid = new GridPane();
+
     private Scene gameScene;
     private Scene menuScene;
+
     private GameState state;
     private AssetManager assets;
     private Controller controller;
-    private int columns = 16;
-    private int rows = 10;
-    private double aspectRatio = 16.0 / 10.0;
-    private Timer time;
+
+    private final int columns = 16;
+    private final int rows = 10;
+
     private VBox vbox;
     private HBox hbox;
+
     private Label labelTime;
     private Label labelSteps;
-    private StackPane stack;
-    private Canvas canvas;
 
+    private Canvas canvas;
+    private StackPane root;
+    private Timer time;
+
+    private final double baseWidth = 800;
+    private final double baseHeight = 500;
+
+    // =========================================================
+    // THREAD LOOP
+    // =========================================================
     @Override
     public void run() {
-        while(!state.isGameWon()){
+        while (!state.isGameWon()) {
             Platform.runLater(() -> {
-
                 updateGrid();
                 setInfo();
             });
-            try{
+
+            try {
                 Thread.sleep(16);
-            }catch (InterruptedException e){break;}
+            } catch (InterruptedException e) {
+                break;
+            }
         }
     }
 
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
     public Renderer(Stage iStage, GameState state) {
+        this.iStage = iStage;
         this.state = state;
         this.assets = new AssetManager();
-        this.iStage = iStage;
+
         vbox = new VBox(20);
         hbox = new HBox(20);
+
         labelTime = new Label("Time: 00:00:00");
         labelSteps = new Label("Steps: 0");
+
         time = new Timer();
 
+        // -------------------------
+        // GAME AREA (CANVAS ONLY)
+        // -------------------------
+        canvas = new Canvas(baseWidth, baseHeight);
+        root = new StackPane(canvas);
 
-        grid = new GridPane();
-        stack = new StackPane();
-        canvas = new Canvas();
-
-        canvas.widthProperty().bind(grid.widthProperty());
-        canvas.heightProperty().bind(grid.heightProperty());
 
         hbox.setAlignment(Pos.CENTER);
         hbox.getChildren().addAll(labelTime, labelSteps);
 
-        stack.getChildren().addAll(grid, canvas);
-        StackPane.setAlignment(canvas, Pos.TOP_CENTER);
-
-        vbox.getChildren().addAll(hbox, stack);
+        vbox.getChildren().addAll(hbox, root);
+        VBox.setVgrow(root, Priority.ALWAYS);
 
         gameScene = new Scene(vbox);
 
-        grid.setAlignment(Pos.CENTER);
+        iStage.setScene(gameScene);
+        iStage.setTitle("Sokoban");
+        iStage.setWidth(baseWidth);
+        iStage.setHeight(baseHeight);
 
-        // Fenster-Größe synchronisieren
+        // -------------------------
+        // RESIZE HANDLING (FIXED ASPECT)
+        // -------------------------
+        gameScene.widthProperty().addListener((obs, o, n) -> resizeCanvas());
+        gameScene.heightProperty().addListener((obs, o, n) -> resizeCanvas());
+
         iStage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            iStage.setHeight(newVal.doubleValue() / aspectRatio);
+            double newHeight = (newVal.doubleValue() / (baseWidth / baseHeight));
+            iStage.setHeight(newHeight);
         });
 
         iStage.heightProperty().addListener((obs, oldVal, newVal) -> {
-            iStage.setWidth(newVal.doubleValue() * aspectRatio);
+            double newWidth = newVal.doubleValue() * (baseWidth / baseHeight);
+            iStage.setWidth(newWidth);
         });
 
-        iStage.setTitle("Sokoban");
         setupMenu();
         showMainMenu();
     }
-    public void setInfo(){
+
+    // =========================================================
+    // RESIZE LOGIC (IMPORTANT)
+    // =========================================================
+    private void resizeCanvas() {
+
+        double windowW = gameScene.getWidth();
+        double windowH = gameScene.getHeight();
+
+        double aspect = baseWidth / baseHeight;
+
+        double targetW = windowW * 0.9;
+        double targetH = windowH * 0.9;
+
+        if (windowW / windowH > aspect) {
+            targetW = windowH * aspect;
+        } else {
+            targetH = windowW / aspect;
+        }
+
+        canvas.setWidth(targetW);
+        canvas.setHeight(targetH);
+    }
+
+    // =========================================================
+    // INFO UI
+    // =========================================================
+    public void setInfo() {
         labelTime.setText("Time: " + time.getTime());
         labelSteps.setText("Steps: " + state.getSteps());
     }
 
-    /**
-     * Set the controller to handle input events
-     */
     public void setController(Controller controller) {
         this.controller = controller;
     }
 
-
+    // =========================================================
+    // MENU
+    // =========================================================
     private void setupMenu() {
+
         Button startButton = new Button("Spiel starten");
         Button leftButton = new Button("<");
         Button rightButton = new Button(">");
+
         Label levelLabel = new Label("Level: " + state.getLevelId());
 
-        // Level-Auswahl
         HBox levelBox = new HBox(10, leftButton, levelLabel, rightButton);
         levelBox.setAlignment(Pos.CENTER);
 
@@ -133,59 +175,34 @@ public class Renderer implements Runnable{
         });
 
         rightButton.setOnAction(e -> {
-            int newLevel = state.getLevelId() + 1;
-            controller.selectLevel(newLevel);
+            controller.selectLevel(state.getLevelId() + 1);
             levelLabel.setText("Level: " + state.getLevelId());
         });
 
-        // Menü-Root
         VBox menuRoot = new VBox(20, startButton, levelBox);
         menuRoot.setAlignment(Pos.CENTER);
         menuRoot.setPadding(new Insets(20));
 
         menuScene = new Scene(menuRoot, 400, 300);
 
-        // Start-Button wechselt zur Game-Scene
-        startButton.setOnAction(e -> {
-            controller.startGame(state.getLevelId());
-        });
+        startButton.setOnAction(e -> controller.startGame(state.getLevelId()));
     }
 
-    /**
-     * Setup keyboard input listener and delegate to controller
-     */
-    public void setupKeyListener(EventHandler keyHandler) {;
+    // =========================================================
+    // INPUT
+    // =========================================================
+    public void setupKeyListener(EventHandler keyHandler) {
         gameScene.setOnKeyPressed(keyHandler);
-
-        // Request focus for keyboard input
-        grid.requestFocus();
+        gameScene.getRoot().requestFocus();
     }
 
+    // =========================================================
+    // SCENE SWITCHING
+    // =========================================================
     public void showMainMenu() {
         time.stopTimer();
-        state.setLevelFlag(false);
         iStage.setScene(menuScene);
         iStage.show();
-    }
-
-    public void showLevelMenu(){
-        ButtonType mainMenuButton = new ButtonType("Hauptmenü");
-        ButtonType closeButton = new ButtonType("Schließen");
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Level geschafft");
-        alert.setHeaderText("Glückwunsch!");
-        alert.setContentText("Du hast das Level abgeschlossen.");
-
-        alert.getButtonTypes().setAll(mainMenuButton, closeButton);
-
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent()) {
-            if (result.get() == mainMenuButton) {
-                showMainMenu();
-            }
-        }
     }
 
     public void showGame() {
@@ -195,66 +212,87 @@ public class Renderer implements Runnable{
         time.start();
     }
 
-    /**
-     * Updates the game grid by rendering all entities
-     */
+    // =========================================================
+    // RENDER LOGIC
+    // =========================================================
     public void updateGrid() {
-        grid.getChildren().clear();
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
         Entity[][] layout = state.getLayoutAsEntities();
+
+        double cellW = canvas.getWidth() / columns;
+        double cellH = canvas.getHeight() / rows;
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < columns; col++) {
+
                 Entity entity = layout[col][row];
+
                 if (entity != null) {
-                    addImage(entity.getAsset(), col, row);
+                    Image img = assets.get(entity.getAsset());
+
+                    gc.drawImage(
+                            img,
+                            col * cellW,
+                            row * cellH,
+                            cellW,
+                            cellH
+                    );
                 }
             }
         }
-        
-        // Player is rendered on top
-        //addImage(state.getPlayerAsset(), state.getPlayerX(), state.getPlayerY());
-        animatePlayer();
 
-        if(state.getLevelFlag()){
+        animatePlayer(gc, cellW, cellH);
+
+        if (state.getLevelFlag()) {
             showLevelMenu();
         }
     }
 
-    /**
-     * Adds an image to the grid at the specified position
-     */
-    private void addImage(String assetName, int col, int row){
-        Image image = assets.get(assetName);
-        ImageView imageView = new ImageView(image);
-        imageView.setPreserveRatio(true);
+    // =========================================================
+    // PLAYER RENDERING
+    // =========================================================
+    private void animatePlayer(GraphicsContext gc, double cellW, double cellH) {
 
-        imageView.fitWidthProperty()
-                .bind(grid.widthProperty().divide(columns));
-        imageView.fitHeightProperty()
-                .bind(grid.heightProperty().divide(rows));
+        for(int frames = 0; frames<2; frames++ ){
+            Image img = assets.getAnimation(state.getPlayerAsset(), frames);
 
-        grid.add(imageView, col, row);
+            if(img == null)
+            {
+                System.out.println("Null");
+                return;
+            }
+
+            gc.drawImage(
+                    img,
+                    state.getPlayerX() * cellW + (frames -0.5),
+                    state.getPlayerY() * cellH + (frames -0.5),
+                    cellW,
+                    cellH
+            );
+        }
+
     }
 
-    private void animatePlayer(){
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+    // =========================================================
+    // LEVEL FINISHED
+    // =========================================================
+    public void showLevelMenu() {
 
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        int i = 0;
-        Image image = assets.getAnimation(state.getPlayerAsset(), i);
-        ImageView imageView = new ImageView(image);
-        imageView.setPreserveRatio(true);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Level geschafft");
+        alert.setHeaderText("Glückwunsch!");
+        alert.setContentText("Du hast das Level abgeschlossen.");
 
-        imageView.fitWidthProperty()
-                .bind(grid.widthProperty().divide(columns));
-        imageView.fitHeightProperty()
-                .bind(grid.heightProperty().divide(rows));
-        //grid.add(imageView, 2, 1);
-        gc.drawImage(image, (grid.getWidth()/columns)*state.getPlayerX(),
-                                           (grid.getHeight()/rows)*state.getPlayerY());
+        alert.showAndWait();
+
+        showMainMenu();
     }
 
+    // optional
     public GridPane getRoot() {
-        return grid;
+        return null;
     }
 }
