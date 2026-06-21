@@ -24,8 +24,6 @@ public class AssetManager {
         Image singleGoal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
         Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate_target.png")));
 
-        Image test = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_down" + 1 + ".png")));
-
 
         List <Image> downMovement = IntStream.range(1,3)
                 .mapToObj(i -> {
@@ -35,17 +33,17 @@ public class AssetManager {
 
         List <Image> upMovement = IntStream.range(1,3)
                 .mapToObj(i -> {
-                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_down" + i + ".png")));
+                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_up" + i + ".png")));
                 }).toList();
 
         List <Image> leftMovement = IntStream.range(1,3)
                 .mapToObj(i -> {
-                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_down" + i + ".png")));
+                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_left" + i + ".png")));
                 }).toList();
 
         List <Image> rightMovement = IntStream.range(1,3)
                 .mapToObj(i -> {
-                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_down" + i + ".png")));
+                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_right" + i + ".png")));
                 }).toList();
 
 
@@ -118,7 +116,13 @@ public class AssetManager {
     }
 
     public Image getAnimation(String asset, int i) {
-        return animations.get(asset).get(i);
+        List<Image> list = animations.get(asset);
+
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+
+        return list.get(i % list.size());
     }
 
 
