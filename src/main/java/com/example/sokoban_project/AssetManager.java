@@ -2,11 +2,14 @@ package com.example.sokoban_project;
 
 import javafx.scene.image.Image;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 public class AssetManager {
     private final Map< String, Image> sprites = new HashMap<>();
+    private final Map< String, List<Image>> animations = new HashMap<>();
 
     public AssetManager() {
 
@@ -20,6 +23,48 @@ public class AssetManager {
         Image cratesGoal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate.png")));
         Image singleGoal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/goal.png")));
         Image goal = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/crate_target.png")));
+
+
+        List <Image> downMovement = IntStream.range(1,3)
+                .mapToObj(i -> {
+                    System.out.println("/Images/player_anim_down" + i + ".png");
+                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_down" + i + ".png")));
+                }).toList();
+
+        List <Image> upMovement = IntStream.range(1,3)
+                .mapToObj(i -> {
+                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_up" + i + ".png")));
+                }).toList();
+
+        List <Image> leftMovement = IntStream.range(1,3)
+                .mapToObj(i -> {
+                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_left" + i + ".png")));
+                }).toList();
+
+        List <Image> rightMovement = IntStream.range(1,3)
+                .mapToObj(i -> {
+                    return new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/Images/player_anim_right" + i + ".png")));
+                }).toList();
+
+
+
+
+        animations.put(
+                "Down_Player",
+                downMovement
+        );
+        animations.put(
+                "Up_Player",
+                upMovement
+        );
+        animations.put(
+                "Left_Player",
+                leftMovement
+        );
+        animations.put(
+                "Right_Player",
+                rightMovement
+        );
 
 
         sprites.put(
@@ -68,6 +113,16 @@ public class AssetManager {
 
     public Image get(String asset) {
         return sprites.get(asset);
+    }
+
+    public Image getAnimation(String asset, int i) {
+        List<Image> list = animations.get(asset);
+
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+
+        return list.get(i % list.size());
     }
 
 
