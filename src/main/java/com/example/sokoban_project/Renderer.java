@@ -307,6 +307,12 @@ public class Renderer implements Runnable {
         playerPos.tx = state.getPlayerX();
         playerPos.ty = state.getPlayerY();
 
+        startX = state.getPlayerX();
+        startY = state.getPlayerY();
+
+        targetX = state.getPlayerX();
+        targetY = state.getPlayerY();
+
         if (time != null) {
             time.stopTimer();
         }
