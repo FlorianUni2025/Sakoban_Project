@@ -37,7 +37,7 @@ public class Renderer implements Runnable {
 
     private Canvas canvas;
     private StackPane root;
-    private Timer time;
+    private TimerThread time;
 
     private final double baseWidth = 800;
     private final double baseHeight = 500;
@@ -48,10 +48,6 @@ public class Renderer implements Runnable {
     private int startX, startY;
     private int targetX, targetY;
 
-    // =========================================================
-    // SMOOTH MOVEMENT SYSTEM
-    // =========================================================
-
     private static class SmoothPos {
         double x, y;
         int tx, ty;
@@ -60,10 +56,18 @@ public class Renderer implements Runnable {
 
     private SmoothPos playerPos = new SmoothPos();
 
-    private static final long MOVE_DURATION = 120;
-
     private long animTimer = 0;
     private int animFrame = 0;
+
+    // =========================================================
+    // PAUSE SYSTEM
+    // =========================================================
+
+    private final Object pauseLock = new Object();
+    private boolean paused = false;
+
+    private Button pauseButton;
+    private Button backButton;
 
     // =========================================================
     // THREAD LOOP
@@ -71,7 +75,20 @@ public class Renderer implements Runnable {
 
     @Override
     public void run() {
+
         while (!state.isGameWon()) {
+
+            // PAUSE BLOCK
+            synchronized (pauseLock) {
+                while (paused) {
+                    try {
+                        pauseLock.wait();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
+            }
+
             Platform.runLater(() -> {
                 updateGrid();
                 setInfo();
@@ -100,13 +117,18 @@ public class Renderer implements Runnable {
         labelTime = new Label("Time: 00:00:00");
         labelSteps = new Label("Steps: 0");
 
-        time = new Timer();
+        time = new TimerThread();
 
         canvas = new Canvas(baseWidth, baseHeight);
         root = new StackPane(canvas);
+        pauseButton = new Button("Pause");
+        backButton = new Button("Back");
+
+        pauseButton.setOnAction(e -> togglePause());
+        backButton.setOnAction(e -> backToMenu());
 
         hbox.setAlignment(Pos.CENTER);
-        hbox.getChildren().addAll(labelTime, labelSteps);
+        hbox.getChildren().addAll(labelTime, labelSteps, pauseButton, backButton);
 
         vbox.getChildren().addAll(hbox, root);
         VBox.setVgrow(root, Priority.ALWAYS);
@@ -133,6 +155,58 @@ public class Renderer implements Runnable {
 
         setupMenu();
         showMainMenu();
+    }
+
+    // =========================================================
+    // PAUSE / RESUME
+    // =========================================================
+
+    public void togglePause() {
+
+        synchronized (pauseLock) {
+
+            paused = !paused;
+
+            if (paused) {
+
+                pauseButton.setText("Resume");
+                time.pauseTimer();
+
+            } else {
+
+                pauseButton.setText("Pause");
+                time.resumeTimer();
+
+                pauseLock.notifyAll();
+
+                Platform.runLater(() ->
+                        gameScene.getRoot().requestFocus()
+                );
+            }
+        }
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    // =========================================================
+    // BACK BUTTON
+    // =========================================================
+
+    public void backToMenu() {
+
+        synchronized (pauseLock) {
+            paused = false;
+            pauseLock.notifyAll();
+        }
+
+        if (time != null) {
+            time.stopTimer();
+        }
+
+        showMainMenu();
+        state.reset();
     }
 
     // =========================================================
@@ -164,7 +238,7 @@ public class Renderer implements Runnable {
     // =========================================================
 
     public void setInfo() {
-        labelTime.setText("Time: " + time.getTime());
+        labelTime.setText("Time: " + time.getFormattedTime());
         labelSteps.setText("Steps: " + state.getSteps());
     }
 
@@ -173,7 +247,7 @@ public class Renderer implements Runnable {
     }
 
     // =========================================================
-    // MENU (UNCHANGED)
+    // MENU
     // =========================================================
 
     private void setupMenu() {
@@ -215,20 +289,16 @@ public class Renderer implements Runnable {
 
     public void setupKeyListener(EventHandler keyHandler) {
         gameScene.setOnKeyPressed(keyHandler);
+        gameScene.setOnKeyReleased(keyHandler);
         gameScene.getRoot().requestFocus();
     }
 
     // =========================================================
-    // SCENES
+    // GAME START
     // =========================================================
 
-    public void showMainMenu() {
-        time.stopTimer();
-        iStage.setScene(menuScene);
-        iStage.show();
-    }
-
     public void showGame() {
+
         iStage.setScene(gameScene);
         updateGrid();
 
@@ -237,12 +307,16 @@ public class Renderer implements Runnable {
         playerPos.tx = state.getPlayerX();
         playerPos.ty = state.getPlayerY();
 
-        time = new Timer();
+        if (time != null) {
+            time.stopTimer();
+        }
+
+        time = new TimerThread();
         time.start();
     }
 
     // =========================================================
-    // GRID RENDER
+    // GRID
     // =========================================================
 
     public void updateGrid() {
@@ -275,33 +349,15 @@ public class Renderer implements Runnable {
     }
 
     // =========================================================
-    // SMOOTH PLAYER + ANIMATION
+    // ANIMATION
     // =========================================================
 
-    private void updateSmooth(SmoothPos p) {
-
-        double t = (System.currentTimeMillis() - p.startTime)
-                / (double) MOVE_DURATION;
-
-        if (t > 1) t = 1;
-
-        p.x = p.x + (p.tx - p.x) * t;
-        p.y = p.y + (p.ty - p.y) * t;
-
-        if (t >= 1) {
-            p.x = p.tx;
-            p.y = p.ty;
-        }
-    }
-
     private void animatePlayer(GraphicsContext gc, double cellW, double cellH) {
+
 
         int x = state.getPlayerX();
         int y = state.getPlayerY();
 
-        // -----------------------------
-        // Start movement animation once
-        // -----------------------------
         if (!isMoving && (x != targetX || y != targetY)) {
 
             startX = targetX;
@@ -314,58 +370,36 @@ public class Renderer implements Runnable {
             isMoving = true;
         }
 
-        // -----------------------------
-        // progress movement
-        // -----------------------------
-        double t = (System.currentTimeMillis() - moveStartTime) / 200.0; // <- speed here
+        double t = (System.currentTimeMillis() - moveStartTime) / 180.0;
 
         if (t >= 1) {
             t = 1;
             isMoving = false;
         }
 
-        // -----------------------------
-        // interpolate position
-        // -----------------------------
         playerPos.x = startX + (targetX - startX) * t;
         playerPos.y = startY + (targetY - startY) * t;
 
-        // -----------------------------
-        // walking animation timing
-        // -----------------------------
         if (isMoving) {
             long now = System.currentTimeMillis();
 
-            if (now - animTimer > 140) { // animation speed
+            if (now - animTimer > 120) {
                 animFrame = (animFrame + 1) % 2;
                 animTimer = now;
             }
         }
 
-        // -----------------------------
-        // choose image
-        // -----------------------------
-        Image img;
+        Image img = isMoving
+                ? assets.getAnimation(state.getPlayerAsset(), animFrame)
+                : assets.get(state.getPlayerAsset());
 
-        if (isMoving) {
-            img = assets.getAnimation(state.getPlayerAsset(), animFrame);
-        } else {
-            img = assets.get(state.getPlayerAsset());
-        }
-
-        // -----------------------------
-        // draw
-        // -----------------------------
-        if (img != null) {
-            gc.drawImage(
-                    img,
-                    playerPos.x * cellW,
-                    playerPos.y * cellH,
-                    cellW,
-                    cellH
-            );
-        }
+        gc.drawImage(img, playerPos.x * cellW, playerPos.y * cellH, cellW, cellH);
     }
+
+    public boolean isMoving(){
+        return isMoving;
+    }
+
     // =========================================================
     // LEVEL FINISHED
     // =========================================================
@@ -380,5 +414,10 @@ public class Renderer implements Runnable {
         alert.showAndWait();
 
         showMainMenu();
+    }
+
+    public void showMainMenu() {
+        iStage.setScene(menuScene);
+        iStage.show();
     }
 }
