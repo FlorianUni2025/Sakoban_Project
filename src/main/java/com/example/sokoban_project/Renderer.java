@@ -38,6 +38,8 @@ public class Renderer implements Runnable {
     private Canvas canvas;
     private StackPane root;
     private TimerThread time;
+    private GridPane editor;
+    private Scene editorScene;
 
     private final double baseWidth = 800;
     private final double baseHeight = 500;
@@ -68,6 +70,7 @@ public class Renderer implements Runnable {
 
     private Button pauseButton;
     private Button backButton;
+    private Button [][] editorField;
 
     // =========================================================
     // THREAD LOOP
@@ -121,21 +124,10 @@ public class Renderer implements Runnable {
 
         canvas = new Canvas(baseWidth, baseHeight);
         root = new StackPane(canvas);
-        pauseButton = new Button("Pause");
-        backButton = new Button("Back");
 
-        pauseButton.setOnAction(e -> togglePause());
-        backButton.setOnAction(e -> backToMenu());
-
-        hbox.setAlignment(Pos.CENTER);
-        hbox.getChildren().addAll(labelTime, labelSteps, pauseButton, backButton);
-
-        vbox.getChildren().addAll(hbox, root);
-        VBox.setVgrow(root, Priority.ALWAYS);
 
         gameScene = new Scene(vbox);
 
-        iStage.setScene(gameScene);
         iStage.setTitle("Sokoban");
         iStage.setWidth(baseWidth);
         iStage.setHeight(baseHeight);
@@ -242,6 +234,10 @@ public class Renderer implements Runnable {
         labelSteps.setText("Steps: " + state.getSteps());
     }
 
+    public void stopTimer(){
+        time.stopTimer();
+    }
+
     public void setController(Controller controller) {
         this.controller = controller;
     }
@@ -255,6 +251,7 @@ public class Renderer implements Runnable {
         Button startButton = new Button("Spiel starten");
         Button leftButton = new Button("<");
         Button rightButton = new Button(">");
+        Button editorButton = new Button("Editor");
 
         Label levelLabel = new Label("Level: " + state.getLevelId());
 
@@ -274,13 +271,14 @@ public class Renderer implements Runnable {
             levelLabel.setText("Level: " + state.getLevelId());
         });
 
-        VBox menuRoot = new VBox(20, startButton, levelBox);
+        VBox menuRoot = new VBox(20, startButton, levelBox, editorButton);
         menuRoot.setAlignment(Pos.CENTER);
         menuRoot.setPadding(new Insets(20));
 
         menuScene = new Scene(menuRoot, 400, 300);
 
         startButton.setOnAction(e -> controller.startGame(state.getLevelId()));
+        editorButton.setOnAction(e -> controller.startEditor());
     }
 
     // =========================================================
@@ -298,6 +296,18 @@ public class Renderer implements Runnable {
     // =========================================================
 
     public void showGame() {
+
+        pauseButton = new Button("Pause");
+        backButton = new Button("Back");
+
+        pauseButton.setOnAction(e -> togglePause());
+        backButton.setOnAction(e -> backToMenu());
+
+        hbox.setAlignment(Pos.CENTER);
+        hbox.getChildren().addAll(labelTime, labelSteps, pauseButton, backButton);
+
+        vbox.getChildren().addAll(hbox, root);
+        VBox.setVgrow(root, Priority.ALWAYS);
 
         iStage.setScene(gameScene);
         updateGrid();
@@ -425,5 +435,26 @@ public class Renderer implements Runnable {
     public void showMainMenu() {
         iStage.setScene(menuScene);
         iStage.show();
+    }
+
+    public void showLevelEditor(){
+        editor = new GridPane(columns, rows);
+        editorField = new Button[columns][rows];
+
+
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                editorField[col][row] = new Button(" ");
+                editor.getChildren().add(editorField[col][row]);
+            }
+        }
+
+        hbox.getChildren().addAll(editor);
+
+        editorScene = new Scene(hbox);
+
+        iStage.setScene(editorScene);
+
     }
 }
