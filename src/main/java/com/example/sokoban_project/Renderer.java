@@ -140,9 +140,11 @@ public class Renderer implements Runnable {
         iStage.setWidth(baseWidth);
         iStage.setHeight(baseHeight);
 
-        // ✅ ÄNDERUNG: Nur Canvas Resize Listener, KEINE Fenster Ratio Erzwingung
         gameScene.widthProperty().addListener((obs, o, n) -> resizeCanvas());
         gameScene.heightProperty().addListener((obs, o, n) -> resizeCanvas());
+
+        // ✅ ENTFERNT: Die Listener, die die Fenster-Ratio erzwingen (Zeilen 146-154 im Original)
+        // Fenster kann jetzt beliebige Größen haben!
 
         setupMenu();
         showMainMenu();
@@ -209,12 +211,19 @@ public class Renderer implements Runnable {
         double windowW = gameScene.getWidth();
         double windowH = gameScene.getHeight();
 
-        // ✅ Canvas passt sich einfach an verfügbare Fläche an
-        double availableW = windowW * 0.9;
-        double availableH = windowH * 0.9;
+        double aspect = baseWidth / baseHeight;
 
-        canvas.setWidth(availableW);
-        canvas.setHeight(availableH);
+        double targetW = windowW * 0.9;
+        double targetH = windowH * 0.9;
+
+        if (windowW / windowH > aspect) {
+            targetW = windowH * aspect;
+        } else {
+            targetH = windowW / aspect;
+        }
+
+        canvas.setWidth(targetW);
+        canvas.setHeight(targetH);
     }
 
     // =========================================================
@@ -572,12 +581,14 @@ public class Renderer implements Runnable {
         root.setPadding(new Insets(15));
 
         // =========================
-        // SCENE CREATION - OHNE RATIO ERZWINGUNG
+        // SINGLE SCENE (FIXED)
         // =========================
         editorScene = new Scene(root, baseWidth, baseHeight);
         iStage.setScene(editorScene);
 
-        // ✅ Nur Resize Listener für Grid, KEINE Fenster-Ratio Erzwingung
+        // =========================
+        // SCALING (ATTACH TO REAL SCENE)
+        // =========================
         editorScene.widthProperty().addListener((obs, o, n) -> updateGridScale());
         editorScene.heightProperty().addListener((obs, o, n) -> updateGridScale());
 
