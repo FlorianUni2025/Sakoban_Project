@@ -143,8 +143,10 @@ public class Renderer implements Runnable {
         gameScene.widthProperty().addListener((obs, o, n) -> resizeCanvas());
         gameScene.heightProperty().addListener((obs, o, n) -> resizeCanvas());
 
-        // ✅ ENTFERNT: Die Listener, die die Fenster-Ratio erzwingen (Zeilen 146-154 im Original)
-        // Fenster kann jetzt beliebige Größen haben!
+        // ✅ ENTFERNT: iStage.widthProperty() Listener (Zeilen 146-149 im Original)
+        // ✅ ENTFERNT: iStage.heightProperty() Listener (Zeilen 151-154 im Original)
+        // → Fenster kann jetzt beliebige Größen haben!
+        // → Canvas/Editor behält die korrekte Ratio mit resizeCanvas()
 
         setupMenu();
         showMainMenu();

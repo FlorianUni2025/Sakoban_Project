@@ -28,6 +28,7 @@ public class Controller {
 
     public void restartLevel() {
         gameLogic.restartLevel();
+        renderer.showGame();
         renderer.updateGrid();
     }
 
@@ -130,6 +131,7 @@ public class Controller {
         }
 
         renderer.updateGrid();
+        renderer.stopTimer();
         renderer.setInfo();
 
         if (guiThread != null) {
@@ -139,5 +141,9 @@ public class Controller {
         renderer.showLevelMenu();
 
         gameLogic.restartLevel();
+    }
+
+    public void startEditor(){
+        renderer.showLevelEditor();
     }
 }
