@@ -16,6 +16,7 @@ public class GameState {
     private Player player;
     private int goals;
     private static int steps;
+    private static Entity editorSelection = new Ground();
 
 
 
@@ -70,6 +71,14 @@ public class GameState {
 
     public boolean getLevelFlag(){
         return levels.get(levelId).getFlag();
+    }
+
+    public Entity getEditorSelection(){
+        return editorSelection;
+    }
+
+    public void setEditorSelection(String asset) {
+        editorSelection = Entity.create(asset);
     }
 
 

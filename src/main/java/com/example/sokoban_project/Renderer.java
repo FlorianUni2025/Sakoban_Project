@@ -4,11 +4,13 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -47,8 +49,14 @@ public class Renderer implements Runnable {
     private boolean isMoving = false;
     private long moveStartTime = 0;
 
+    //Controller?
     private int startX, startY;
     private int targetX, targetY;
+    private boolean mouseDown = false;
+    private ImageView lastPainted = null;
+    private static final double PALETTE_WIDTH = 180;
+    private static final double PADDING = 40;
+
 
     private static class SmoothPos {
         double x, y;
@@ -70,7 +78,7 @@ public class Renderer implements Runnable {
 
     private Button pauseButton;
     private Button backButton;
-    private Button [][] editorField;
+    private StackPane [][] editorField;
 
     // =========================================================
     // THREAD LOOP
@@ -437,24 +445,264 @@ public class Renderer implements Runnable {
         iStage.show();
     }
 
-    public void showLevelEditor(){
-        editor = new GridPane(columns, rows);
-        editorField = new Button[columns][rows];
+    private VBox createPalette() {
 
+        VBox palette = new VBox(10);
 
+        palette.setPrefWidth(180);
+        palette.setMinWidth(180);
+        palette.setMaxWidth(180);
+
+        palette.setStyle(
+                "-fx-padding: 10;" +
+                        "-fx-background-color: #2b2b2b;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-border-radius: 12;" +
+                        "-fx-border-color: #444;"
+        );
+
+        for (String assetKey : assets.getKeys()) {
+
+            ImageView preview = new ImageView(assets.get(assetKey));
+            preview.setFitWidth(64);
+            preview.setFitHeight(64);
+            preview.setPreserveRatio(true);
+
+            StackPane tileButton = new StackPane(preview);
+
+            tileButton.setStyle(
+                    "-fx-border-color: #666;" +
+                            "-fx-padding: 6;" +
+                            "-fx-background-color: #1e1e1e;"
+            );
+
+            tileButton.setOnMouseEntered(e ->
+                    tileButton.setStyle("-fx-border-color: white; -fx-padding: 6; -fx-background-color: #2e2e2e;")
+            );
+
+            tileButton.setOnMouseExited(e ->
+                    tileButton.setStyle("-fx-border-color: #666; -fx-padding: 6; -fx-background-color: #1e1e1e;")
+            );
+
+            tileButton.setOnMouseClicked(e -> {
+                state.setEditorSelection(assetKey);
+            });
+
+            palette.getChildren().add(tileButton);
+        }
+
+        return palette;
+    }
+
+    private void paint(ImageView view) {
+        if (view == null) return;
+
+        // avoid redundant repaint spam
+        if (view == lastPainted) return;
+
+        Image img = assets.get(state.getEditorSelection().getAsset());
+        view.setImage(img);
+
+        lastPainted = view;
+    }
+
+    public void showLevelEditor() {
+
+        // =========================
+        // GRID
+        // =========================
+        editorField = new StackPane[columns][rows];
+
+        editor = new GridPane();
+        editor.setHgap(0);
+        editor.setVgap(0);
+
+        editor.setPadding(new Insets(15));
+
+        // IMPORTANT: stop GridPane from expanding unpredictably
+        editor.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        editor.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
+        editor.getColumnConstraints().clear();
+        editor.getRowConstraints().clear();
+
+        for (int col = 0; col < columns; col++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setHgrow(Priority.ALWAYS);
+            cc.setFillWidth(true);
+            editor.getColumnConstraints().add(cc);
+        }
+
+        for (int row = 0; row < rows; row++) {
+            RowConstraints rc = new RowConstraints();
+            rc.setVgrow(Priority.ALWAYS);
+            rc.setFillHeight(true);
+            editor.getRowConstraints().add(rc);
+        }
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < columns; col++) {
-                editorField[col][row] = new Button(" ");
-                editor.getChildren().add(editorField[col][row]);
+
+                StackPane cell = new StackPane();
+                cell.setMinSize(0, 0);
+                cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+                cell.setStyle("-fx-background-color: white; -fx-border-color: black;");
+
+                ImageView view = new ImageView();
+                view.setPreserveRatio(false);
+                view.setSmooth(false);
+
+                view.fitWidthProperty().bind(cell.widthProperty());
+                view.fitHeightProperty().bind(cell.heightProperty());
+
+                cell.getChildren().add(view);
+
+                editorField[col][row] = cell;
+                editor.add(cell, col, row);
             }
         }
 
-        hbox.getChildren().addAll(editor);
+        // =========================
+        // PALETTE
+        // =========================
+        VBox palette = createPalette();
 
-        editorScene = new Scene(hbox);
+        palette.setPrefWidth(180);
+        palette.setSpacing(10);
 
+        palette.setStyle(
+                "-fx-padding: 10;" +
+                        "-fx-background-color: #2b2b2b;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-border-radius: 12;" +
+                        "-fx-border-color: #4F4;"
+        );
+
+        BorderPane.setMargin(palette, new Insets(15, 15, 15, 10));
+
+        // =========================
+        // ROOT LAYOUT
+        // =========================
+        BorderPane root = createEditorLayout(editor, palette);
+        root.setPadding(new Insets(15));
+
+        // =========================
+        // SINGLE SCENE (FIXED)
+        // =========================
+        editorScene = new Scene(root, baseWidth, baseHeight);
         iStage.setScene(editorScene);
 
+        // =========================
+        // SCALING (ATTACH TO REAL SCENE)
+        // =========================
+        editorScene.widthProperty().addListener((obs, o, n) -> updateGridScale());
+        editorScene.heightProperty().addListener((obs, o, n) -> updateGridScale());
+
+        Platform.runLater(this::updateGridScale);
+
+        // =========================
+        // PAINT SYSTEM
+        // =========================
+        editorScene.setOnMousePressed(e -> {
+            mouseDown = true;
+            handlePaint(e.getPickResult().getIntersectedNode());
+        });
+
+        editorScene.setOnMouseDragged(e -> {
+            if (mouseDown) {
+                handlePaint(e.getPickResult().getIntersectedNode());
+            }
+        });
+
+        editorScene.setOnMouseReleased(e -> mouseDown = false);
+    }
+
+    private BorderPane createEditorLayout(GridPane editor, VBox palette) {
+
+        StackPane gridBox = new StackPane(editor);
+
+        gridBox.setStyle(
+                "-fx-padding: 20;" +
+                        "-fx-background-color: #1e1e1e;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-border-radius: 12;" +
+                        "-fx-border-color: #444;"
+        );
+
+        // 🔥 IMPORTANT: forces it to never exceed available space
+        gridBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        gridBox.setMinSize(0, 0);
+
+        BorderPane root = new BorderPane();
+
+        root.setCenter(gridBox);
+        root.setRight(palette);
+
+        BorderPane.setMargin(palette, new Insets(15, 15, 15, 10));
+
+        // 🔥 prevents “top gap illusion”
+        BorderPane.setAlignment(gridBox, Pos.CENTER);
+
+        return root;
+    }
+
+
+    private void handlePaint(Object target) {
+        if (target == null) return;
+
+        Node node = (Node) target;
+
+        while (node != null && !(node instanceof StackPane)) {
+            node = node.getParent();
+        }
+
+        if (node == null) return;
+
+        StackPane cell = (StackPane) node;
+
+        // ✅ IMPORTANT: only paint cells from editor grid
+        if (cell.getParent() != editor) return;
+
+        if (cell.getChildren().isEmpty()) return;
+
+        ImageView view = (ImageView) cell.getChildren().get(0);
+        paint(view);
+    }
+
+    private void updateGridScale() {
+
+        if (editor == null) return;
+
+        double availableWidth = editor.getParent() instanceof Region r ? r.getWidth() : editorScene.getWidth();
+        double availableHeight = editor.getParent() instanceof Region r ? r.getHeight() : editorScene.getHeight();
+
+        double paletteWidth = 180;
+        double padding = 40;
+
+        availableWidth -= paletteWidth;
+        availableHeight -= padding;
+
+        double cellSize = Math.min(
+                availableWidth / columns,
+                availableHeight / rows
+        );
+
+        double gridWidth = cellSize * columns;
+        double gridHeight = cellSize * rows;
+
+        editor.setPrefSize(gridWidth, gridHeight);
+        editor.setMaxSize(gridWidth, gridHeight);
+
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < columns; x++) {
+
+                StackPane cell = editorField[x][y];
+
+                cell.setPrefSize(cellSize, cellSize);
+                cell.setMinSize(cellSize, cellSize);
+                cell.setMaxSize(cellSize, cellSize);
+            }
+        }
     }
 }

@@ -1,21 +1,47 @@
 package com.example.sokoban_project;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 abstract class Entity {
+
     protected String asset;
 
-    Entity(String a){
+    Entity(String a) {
         this.asset = a;
     }
 
-    public String getAsset(){
+    public String getAsset() {
         return asset;
-    };
+    }
 
+    // =========================
+    // ENTITY REGISTRY
+    // =========================
+    private static final Map<String, Supplier<Entity>> REGISTRY = new HashMap<>();
 
+    protected static void register(String name, Supplier<Entity> creator) {
+        REGISTRY.put(name, creator);
+    }
+
+    public static Entity create(String name) {
+        Supplier<Entity> supplier = REGISTRY.get(name);
+
+        if (supplier == null) {
+            throw new IllegalArgumentException("Unknown entity: " + name);
+        }
+
+        return supplier.get();
+    }
 }
 
 class Wall extends Entity{
-    Wall(){
+    static {
+        Entity.register("Wall", Wall::new);
+    }
+
+    Wall() {
         super("Wall");
     }
 }
@@ -25,6 +51,10 @@ class Player extends Entity {
     private int y;
     private double tileSize;
     private Direction dir;
+
+    static {
+        Entity.register("Player", () -> new Player(0, 0));
+    }
 
     Player(int x, int y){
         super("Down_Player");
@@ -80,13 +110,22 @@ class Player extends Entity {
 }
 
 class Ground extends Entity{
-    Ground(){
+
+     static {
+        Entity.register("Ground", Ground::new);
+     }
+
+     Ground() {
         super("Ground");
-    }
+     }
 }
 
 class Crates extends Entity{
     private boolean onGoal = false;
+
+    static {
+        Entity.register("Crates", Crates::new);
+    }
 
     Crates(){
         super("Crates");
@@ -109,6 +148,10 @@ class Crates extends Entity{
 
 class Goal extends Entity{
     private boolean activated = false;
+
+    static {
+        Entity.register("Goal", Goal::new);
+    }
 
     Goal(){
         super("Goal");

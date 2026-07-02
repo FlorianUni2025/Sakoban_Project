@@ -1,10 +1,8 @@
 package com.example.sokoban_project;
 
 import javafx.scene.image.Image;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class AssetManager {
@@ -123,6 +121,9 @@ public class AssetManager {
         }
 
         return list.get(i % list.size());
+    }
+    public Set<String> getKeys() {
+        return sprites.keySet();
     }
 
 
