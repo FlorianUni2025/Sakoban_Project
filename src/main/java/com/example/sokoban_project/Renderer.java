@@ -122,33 +122,18 @@ public class Renderer implements Runnable {
         this.state = state;
         this.assets = new AssetManager();
 
-        vbox = new VBox(20);
-        hbox = new HBox(20);
-
-        labelTime = new Label("Time: 00:00:00");
-        labelSteps = new Label("Steps: 0");
-
-        time = new TimerThread();
-
-        canvas = new Canvas(baseWidth, baseHeight);
-        root = new StackPane(canvas);
-
-
-        gameScene = new Scene(vbox);
-
         iStage.setTitle("Sokoban");
         iStage.setWidth(baseWidth);
         iStage.setHeight(baseHeight);
 
-        gameScene.widthProperty().addListener((obs, o, n) -> resizeCanvas());
-        gameScene.heightProperty().addListener((obs, o, n) -> resizeCanvas());
+        backButton = new Button("Back");
+        backButton.setOnAction(e -> backToMenu());
 
-        // ✅ ENTFERNT: iStage.widthProperty() Listener (Zeilen 146-149 im Original)
-        // ✅ ENTFERNT: iStage.heightProperty() Listener (Zeilen 151-154 im Original)
-        // → Fenster kann jetzt beliebige Größen haben!
-        // → Canvas/Editor behält die korrekte Ratio mit resizeCanvas()
+        vbox = new VBox(20);
+        hbox = new HBox(20);
 
         setupMenu();
+        setupGame();
         showMainMenu();
     }
 
@@ -298,19 +283,32 @@ public class Renderer implements Runnable {
     // GAME START
     // =========================================================
 
-    public void showGame() {
+    private void setupGame(){
+
+        labelTime = new Label("Time: 00:00:00");
+        labelSteps = new Label("Steps: 0");
+        time = new TimerThread();
+        canvas = new Canvas(baseWidth, baseHeight);
+        root = new StackPane(canvas);
 
         pauseButton = new Button("Pause");
-        backButton = new Button("Back");
-
         pauseButton.setOnAction(e -> togglePause());
-        backButton.setOnAction(e -> backToMenu());
+
 
         hbox.setAlignment(Pos.CENTER);
-        hbox.getChildren().addAll(labelTime, labelSteps, pauseButton, backButton);
-
         vbox.getChildren().addAll(hbox, root);
         VBox.setVgrow(root, Priority.ALWAYS);
+
+
+        gameScene = new Scene(vbox);
+
+        gameScene.widthProperty().addListener((obs, o, n) -> resizeCanvas());
+        gameScene.heightProperty().addListener((obs, o, n) -> resizeCanvas());
+    }
+
+    public void showGame() {
+        hbox.getChildren().clear();
+        hbox.getChildren().addAll(labelTime, labelSteps, pauseButton, backButton);
 
         iStage.setScene(gameScene);
         updateGrid();
@@ -450,7 +448,7 @@ public class Renderer implements Runnable {
 
         palette.setStyle(
                 "-fx-padding: 10;" +
-                        "-fx-background-color: #2b2b2b;" +
+                        "-fx-background-color: #2b2b2b;" + //2b2b2b
                         "-fx-background-radius: 12;" +
                         "-fx-border-radius: 12;" +
                         "-fx-border-color: #444;"
@@ -514,24 +512,20 @@ public class Renderer implements Runnable {
 
         editor.setPadding(new Insets(15));
 
-        // IMPORTANT: stop GridPane from expanding unpredictably
-        editor.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        editor.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-
+        editor.setMinSize(0, 0);
+        editor.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         editor.getColumnConstraints().clear();
         editor.getRowConstraints().clear();
 
         for (int col = 0; col < columns; col++) {
             ColumnConstraints cc = new ColumnConstraints();
-            cc.setHgrow(Priority.ALWAYS);
-            cc.setFillWidth(true);
+            cc.setPercentWidth(100.0 / columns); // 👈 wichtig
             editor.getColumnConstraints().add(cc);
         }
 
         for (int row = 0; row < rows; row++) {
             RowConstraints rc = new RowConstraints();
-            rc.setVgrow(Priority.ALWAYS);
-            rc.setFillHeight(true);
+            rc.setPercentHeight(100.0 / rows); // 👈 wichtig
             editor.getRowConstraints().add(rc);
         }
 
@@ -568,25 +562,45 @@ public class Renderer implements Runnable {
 
         palette.setStyle(
                 "-fx-padding: 10;" +
-                        "-fx-background-color: #2b2b2b;" +
+                        "-fx-background-color: #0F0;" + //2b2b2b
                         "-fx-background-radius: 12;" +
                         "-fx-border-radius: 12;" +
                         "-fx-border-color: #4F4;"
         );
 
-        BorderPane.setMargin(palette, new Insets(15, 15, 15, 10));
+        VBox.setMargin(palette, new Insets(15, 15, 15, 10));
 
         // =========================
         // ROOT LAYOUT
         // =========================
         BorderPane root = createEditorLayout(editor, palette);
-        root.setPadding(new Insets(15));
+
+        root.setStyle("-fx-background-color: red;");
+
+        BorderPane.setAlignment(palette, Pos.CENTER_RIGHT);
+        root.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+
+        StackPane wrapper = new StackPane(root);
+
+        wrapper.setPadding(new Insets(20));
 
         // =========================
         // SINGLE SCENE (FIXED)
         // =========================
-        editorScene = new Scene(root, baseWidth, baseHeight);
+
+        VBox editorUI = new VBox();
+        HBox menu = new HBox();
+
+        menu.setAlignment(Pos.CENTER);
+        menu.getChildren().addAll(backButton);
+        editorUI.getChildren().addAll(menu, root);
+        VBox.setVgrow(root, Priority.ALWAYS);
+
+        editorScene = new Scene(editorUI, baseWidth, baseHeight);
+
+
         iStage.setScene(editorScene);
+
 
         // =========================
         // SCALING (ATTACH TO REAL SCENE)
@@ -618,26 +632,20 @@ public class Renderer implements Runnable {
         StackPane gridBox = new StackPane(editor);
 
         gridBox.setStyle(
-                "-fx-padding: 20;" +
-                        "-fx-background-color: #1e1e1e;" +
+                "-fx-background-color: #00F;" + //1e1e1e
                         "-fx-background-radius: 12;" +
                         "-fx-border-radius: 12;" +
                         "-fx-border-color: #444;"
         );
 
-        // 🔥 IMPORTANT: forces it to never exceed available space
-        gridBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        gridBox.setMinSize(0, 0);
-
         BorderPane root = new BorderPane();
-
         root.setCenter(gridBox);
         root.setRight(palette);
 
-        BorderPane.setMargin(palette, new Insets(15, 15, 15, 10));
+        BorderPane.setMargin(gridBox, new Insets(10));
+        BorderPane.setMargin(palette, new Insets(10));
 
-        // 🔥 prevents "top gap illusion"
-        BorderPane.setAlignment(gridBox, Pos.CENTER);
+        root.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         return root;
     }
@@ -656,7 +664,6 @@ public class Renderer implements Runnable {
 
         StackPane cell = (StackPane) node;
 
-        // ✅ IMPORTANT: only paint cells from editor grid
         if (cell.getParent() != editor) return;
 
         if (cell.getChildren().isEmpty()) return;
